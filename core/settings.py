@@ -30,7 +30,7 @@ INSTALLED_APPS = [
     'apps.analytics',
     'apps.community',
     'apps.payments',
-     'apps.notifications',
+    'apps.notifications',
     'apps.chat',
     'apps.ai',
     'apps.teams',
@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'apps.newsletter',
     'apps.feedback',
     'apps.audit',
+    'apps.legal',
 ]
 
 MIDDLEWARE = [
@@ -161,3 +162,5 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+
