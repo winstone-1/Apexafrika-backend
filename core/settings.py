@@ -146,3 +146,18 @@ MPESA = {
     'ENVIRONMENT': os.getenv('MPESA_ENVIRONMENT', 'sandbox'),
     'BASE_URL': os.getenv('MPESA_BASE_URL', 'https://sandbox.safaricom.co.ke'),
 }
+
+# GROQ AI Configuration
+GROQ_API_KEY = os.getenv('GROQ_API_KEY', '')
+GROQ_MODEL = os.getenv('GROQ_MODEL', 'llama3-70b-8192')
+
+# Channels Configuration (for WebSocket chat)
+ASGI_APPLICATION = 'core.asgi.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [(os.getenv('REDIS_HOST', '127.0.0.1'), 6379)],
+        },
+    },
+}

@@ -1,7 +1,13 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import NotificationViewSet, NotificationPreferenceView
 
-app_name = '$app'
+router = DefaultRouter()
+router.register(r'', NotificationViewSet, basename='notification')
+
+app_name = 'notifications'
 
 urlpatterns = [
-    # Add URLs here
+    path('', include(router.urls)),
+    path('preferences/', NotificationPreferenceView.as_view(), name='notification-preferences'),
 ]

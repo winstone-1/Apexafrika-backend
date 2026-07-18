@@ -13,6 +13,8 @@ class Notification(models.Model):
         SYSTEM = 'SYSTEM', 'System'
         ACHIEVEMENT = 'ACHIEVEMENT', 'Achievement'
         REMINDER = 'REMINDER', 'Reminder'
+        TEAM = 'TEAM', 'Team'
+        STREAM = 'STREAM', 'Stream'
     
     class Channel(models.TextChoices):
         PUSH = 'PUSH', 'Push'
@@ -31,6 +33,7 @@ class Notification(models.Model):
     is_read = models.BooleanField(default=False)
     is_sent = models.BooleanField(default=False)
     sent_at = models.DateTimeField(null=True, blank=True)
+    read_at = models.DateTimeField(null=True, blank=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -39,10 +42,16 @@ class Notification(models.Model):
         indexes = [
             models.Index(fields=['user', '-created_at']),
             models.Index(fields=['is_read']),
+            models.Index(fields=['type']),
         ]
     
     def __str__(self):
         return f"{self.user.username} - {self.title}"
+    
+    def mark_as_read(self):
+        self.is_read = True
+        self.read_at = timezone.now()
+        self.save(update_fields=['is_read', 'read_at'])
 
 class NotificationPreference(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='notification_preferences')
@@ -51,24 +60,33 @@ class NotificationPreference(models.Model):
     tournament_reminders = models.BooleanField(default=True)
     match_updates = models.BooleanField(default=True)
     registration_alerts = models.BooleanField(default=True)
+    tournament_results = models.BooleanField(default=True)
     
     # Community notifications
     post_comments = models.BooleanField(default=True)
     post_likes = models.BooleanField(default=True)
     mentions = models.BooleanField(default=True)
+    new_posts = models.BooleanField(default=True)
     
     # Payment notifications
     payment_confirmation = models.BooleanField(default=True)
     prize_notifications = models.BooleanField(default=True)
+    refund_notifications = models.BooleanField(default=True)
+    
+    # Team notifications
+    team_invites = models.BooleanField(default=True)
+    team_updates = models.BooleanField(default=True)
     
     # System notifications
     system_updates = models.BooleanField(default=True)
     security_alerts = models.BooleanField(default=True)
+    achievement_unlocks = models.BooleanField(default=True)
     
     # Channels
     push_enabled = models.BooleanField(default=True)
     email_enabled = models.BooleanField(default=True)
     sms_enabled = models.BooleanField(default=False)
+    in_app_enabled = models.BooleanField(default=True)
     
     updated_at = models.DateTimeField(auto_now=True)
     

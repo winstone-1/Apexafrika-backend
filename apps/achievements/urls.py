@@ -1,7 +1,13 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import AchievementViewSet, UserAchievementViewSet
 
-app_name = '$app'
+router = DefaultRouter()
+router.register(r'all', AchievementViewSet, basename='achievement')
+router.register(r'user', UserAchievementViewSet, basename='user-achievement')
+
+app_name = 'achievements'
 
 urlpatterns = [
-    # Add URLs here
+    path('', include(router.urls)),
 ]

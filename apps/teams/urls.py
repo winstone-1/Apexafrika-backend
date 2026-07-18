@@ -1,7 +1,12 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import TeamViewSet
 
-app_name = '$app'
+router = DefaultRouter()
+router.register(r'', TeamViewSet, basename='team')
+
+app_name = 'teams'
 
 urlpatterns = [
-    # Add URLs here
+    path('', include(router.urls)),
 ]

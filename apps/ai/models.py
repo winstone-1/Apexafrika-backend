@@ -43,11 +43,13 @@ class AIPrediction(models.Model):
         TOURNAMENT_WINNER = 'TOURNAMENT_WINNER', 'Tournament Winner'
         PLAYER_PERFORMANCE = 'PLAYER_PERFORMANCE', 'Player Performance'
         MATCH_SCORE = 'MATCH_SCORE', 'Match Score'
+        TEAM_PERFORMANCE = 'TEAM_PERFORMANCE', 'Team Performance'
     
     type = models.CharField(max_length=20, choices=Type.choices)
     match = models.ForeignKey('tournaments.Match', on_delete=models.CASCADE, null=True, blank=True)
     tournament = models.ForeignKey('tournaments.Tournament', on_delete=models.CASCADE, null=True, blank=True)
-    player = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    player = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='ai_predictions')
+    team = models.ForeignKey('teams.Team', on_delete=models.CASCADE, null=True, blank=True)
     
     prediction = models.JSONField()
     confidence = models.FloatField(default=0.0)
@@ -59,6 +61,10 @@ class AIPrediction(models.Model):
     
     class Meta:
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['type']),
+            models.Index(fields=['-created_at']),
+        ]
     
     def __str__(self):
         return f"{self.type} - {self.created_at}"
