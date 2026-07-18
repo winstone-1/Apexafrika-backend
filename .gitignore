@@ -1,0 +1,325 @@
+# =====================
+# Python / Django
+# =====================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyc
+*.pyo
+
+# Virtual Environment
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# Database
+*.sqlite3
+*.db
+*.sql
+*.psql
+
+# Django-specific
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+/staticfiles/
+/static/
+/media/
+/mediafiles/
+
+# Python anywhere
+*.wsgi
+
+# =====================
+# Environment Variables
+# =====================
+
+.env
+.env.local
+.env.production
+.env.development
+.env.staging
+.env.test
+.env.*.local
+
+# =====================
+# IDE / Editor
+# =====================
+
+# VSCode
+.vscode/
+*.code-workspace
+.vscode-test/
+*.swp
+*.swo
+*~
+
+# PyCharm
+.idea/
+*.iml
+.idea_modules/
+.idea/
+.ipynb_checkpoints/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.vim
+*.vimrc
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+
+# =====================
+# OS / System
+# =====================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*.pid
+*.lock
+*.socket
+*.sock
+*.swp
+*.swo
+*~
+
+# =====================
+# Logs / Cache / Temp
+# =====================
+
+logs/
+*.log
+*.pid
+*.seed
+*.pid.lock
+*.pid.log
+*.lock
+*.tmp
+*.temp
+
+# Cache
+.cache/
+.pytest_cache/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+.coverage
+coverage.xml
+*.cover
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+celerybeat-schedule.db
+*.pid
+
+# =====================
+# Node / Frontend
+# =====================
+
+# Node modules
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Build outputs
+dist/
+dist-ssr/
+*.local
+*.min.js
+*.min.css
+
+# Testing
+coverage/
+.nyc_output/
+.vitest/
+vitest.config.*
+playwright-report/
+test-results/
+
+# =====================
+# Docker
+# =====================
+
+docker-compose.override.yml
+docker-compose.*.yml
+!.dockerignore
+.dockerignore
+Dockerfile.*
+*.dockerfile
+docker-compose.dev.yml
+docker-compose.prod.yml
+
+# =====================
+# Misc
+# =====================
+
+# Secrets
+*.pem
+*.key
+*.crt
+*.csr
+*.p12
+*.pfx
+*.jks
+*.keystore
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+*.rej
+
+# Archive files
+*.zip
+*.tar
+*.gz
+*.rar
+*.7z
+
+# =====================
+# Project Specific
+# =====================
+
+# ApexAfrika specific
+media/avatars/
+media/tournament_banners/
+media/community_media/
+media/community_thumbnails/
+media/reports/
+staticfiles/
+static/
+*.pyc
+*.pyo
+*.pyd
+*.swp
+*.swo
+
+# =====================
+# Documentation
+# =====================
+
+# Generated docs
+docs/_build/
+docs/api/
+site/
+*.md.bak
+
+# =====================
+# Deployment
+# =====================
+
+*.pid
+*.sock
+*.socket
+*.lock
+.deploy/
+.github/workflows/*.secrets
+.terraform/
+terraform.tfstate
+terraform.tfstate.*
+*.tfvars
+*.tfvars.json
+
+# =====================
+# Testing & Coverage
+# =====================
+
+.coverage
+coverage/
+htmlcov/
+.tox/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+*.cover
+*.py,cover
+nosetests.xml
+coverage.xml
+*.coverage
+*.coverage.*
+*.xml
+
+# =====================
+# Debugging
+# =====================
+
+*.log
+*.pid
+*.tmp
+*.swp
+*.swo
+*~
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
