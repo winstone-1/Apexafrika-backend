@@ -1,13 +1,11 @@
-"""User models for ApexAfrika - Python 3.12"""
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
+from django_otp.plugins.otp_totp.models import TOTPDevice
 from typing import Optional
 from datetime import datetime
 
 class User(AbstractUser):
-    """Custom User model with Python 3.12 type hints"""
-    
     class Role(models.TextChoices):
         ORGANIZER = 'ORGANIZER', 'Tournament Organizer'
         PLAYER = 'PLAYER', 'Player'
@@ -41,6 +39,17 @@ class User(AbstractUser):
     total_matches = models.IntegerField(default=0)
     win_rate = models.FloatField(default=0.0)
     
+    # 2FA
+    is_2fa_enabled = models.BooleanField(default=False)
+    totp_device = models.OneToOneField(
+        TOTPDevice,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='user_device'
+    )
+    backup_codes = models.JSONField(default=list, blank=True)
+    
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -71,7 +80,6 @@ class User(AbstractUser):
         return self.role == self.Role.CREATOR
     
     def update_win_rate(self) -> None:
-        """Update win rate based on total matches and wins"""
         if self.total_matches > 0:
             self.win_rate = (self.tournaments_won / self.total_matches) * 100
         else:
@@ -79,8 +87,25 @@ class User(AbstractUser):
         self.save(update_fields=['win_rate'])
     
     def increment_matches(self, won: bool = False) -> None:
-        """Increment match count and optionally wins"""
         self.total_matches += 1
         if won:
             self.tournaments_won += 1
         self.update_win_rate()
+    
+    def enable_2fa(self, device):
+        self.is_2fa_enabled = True
+        self.totp_device = device
+        self.save()
+    
+    def disable_2fa(self):
+        self.is_2fa_enabled = False
+        if self.totp_device:
+            self.totp_device.delete()
+            self.totp_device = None
+        self.backup_codes = []
+        self.save()
+    
+    def verify_2fa(self, code):
+        if not self.totp_device:
+            return False
+        return self.totp_device.verify_token(code)

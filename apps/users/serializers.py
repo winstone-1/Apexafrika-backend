@@ -1,4 +1,3 @@
-"""User serializers with Python 3.12 type hints"""
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
@@ -16,9 +15,10 @@ class UserSerializer(serializers.ModelSerializer):
             'twitter', 'twitch', 'youtube',
             'tournaments_participated', 'tournaments_won', 
             'total_matches', 'win_rate',
+            'is_2fa_enabled',
             'date_joined', 'last_active'
         )
-        read_only_fields = ('date_joined', 'last_active')
+        read_only_fields = ('date_joined', 'last_active', 'is_2fa_enabled')
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
@@ -36,7 +36,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError({"password": "Password fields didn't match."})
         
-        # Check if gamer_tag is unique (if provided)
         if attrs.get('gamer_tag'):
             if User.objects.filter(gamer_tag=attrs['gamer_tag']).exists():
                 raise serializers.ValidationError({"gamer_tag": "This gamer tag is already taken."})
@@ -61,5 +60,28 @@ class LoginSerializer(serializers.Serializer):
                 'user': UserSerializer(user).data,
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
+                'requires_2fa': user.is_2fa_enabled
             }
         raise serializers.ValidationError('Invalid credentials')
+
+# Password Reset Serializers
+class PasswordResetSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    uid = serializers.CharField()
+    token = serializers.CharField()
+    new_password = serializers.CharField(validators=[validate_password])
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField()
+    new_password = serializers.CharField(validators=[validate_password])
+
+# 2FA Serializers
+class TwoFASetupSerializer(serializers.Serializer):
+    device_id = serializers.IntegerField()
+    code = serializers.CharField(max_length=6)
+
+class TwoFAVerifySerializer(serializers.Serializer):
+    code = serializers.CharField(max_length=6)
+    remember_device = serializers.BooleanField(default=False)

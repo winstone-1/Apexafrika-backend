@@ -1,0 +1,756 @@
+{
+  "info": {
+    "name": "ApexAfrika API - Complete (19 Apps)",
+    "description": "ApexAfrika - Game Operations Platform for African Esports\n\nComplete API collection with all 19 apps:\n- Authentication (JWT + Google OAuth + 2FA + Password Reset)\n- Tournament Management\n- Player Analytics\n- Community\n- Payments (M-Pesa)\n- Notifications\n- Chat (WebSocket-ready)\n- AI (Groq)\n- Teams\n- Sponsors\n- Achievements\n- Schedules\n- Streaming\n- Content & Education\n- Newsletter\n- Feedback\n- Audit\n- Legal\n\nSet base_url = http://127.0.0.1:8000\nAfter login, paste access token into the access_token variable.\n\nFor 2FA: After login, if requires_2fa is true, verify with /api/v1/auth/2fa/verify/",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "base_url", "value": "http://127.0.0.1:8000", "type": "string"},
+    {"key": "access_token", "value": "", "type": "string"},
+    {"key": "refresh_token", "value": "", "type": "string"},
+    {"key": "tournament_id", "value": "1", "type": "string"},
+    {"key": "match_id", "value": "1", "type": "string"},
+    {"key": "team_id", "value": "1", "type": "string"},
+    {"key": "post_id", "value": "1", "type": "string"},
+    {"key": "article_id", "value": "1", "type": "string"},
+    {"key": "stream_id", "value": "1", "type": "string"},
+    {"key": "user_id", "value": "1", "type": "string"},
+    {"key": "feedback_id", "value": "1", "type": "string"},
+    {"key": "subscription_id", "value": "1", "type": "string"}
+  ],
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "Register Player",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/auth/register/",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"testplayer\",\n  \"email\": \"test@apexafrika.com\",\n  \"password\": \"TestPass123!\",\n  \"password2\": \"TestPass123!\",\n  \"gamer_tag\": \"NoobSlayerKE\",\n  \"role\": \"PLAYER\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Register Organizer",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/auth/register/",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"tournamentorg\",\n  \"email\": \"org@apexafrika.com\",\n  \"password\": \"TestPass123!\",\n  \"password2\": \"TestPass123!\",\n  \"gamer_tag\": \"TournamentPro\",\n  \"role\": \"ORGANIZER\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/auth/login/",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"testplayer\",\n  \"password\": \"TestPass123!\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.access) {",
+                  "        pm.environment.set(\"access_token\", jsonData.access);",
+                  "        pm.environment.set(\"refresh_token\", jsonData.refresh);",
+                  "        pm.environment.set(\"user_id\", jsonData.user.id);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/auth/refresh/",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh\": \"{{refresh_token}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/auth/profile/",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ]
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/api/v1/auth/profile/",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bio\": \"Professional Valorant player from Kenya\",\n  \"phone_number\": \"+254712345678\",\n  \"main_game\": \"Valorant\",\n  \"twitter\": \"@apexgamer\",\n  \"twitch\": \"twitch.tv/apexgamer\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/auth/logout/",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Google OAuth",
+      "item": [
+        {
+          "name": "Google OAuth Login",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/auth/google-oauth/",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"google_auth_code_here\",\n  \"redirect_uri\": \"http://localhost:5173/auth/callback\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Password Reset",
+      "item": [
+        {
+          "name": "Password Reset Request",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/auth/password-reset/",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@apexafrika.com\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Password Reset Confirm",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/auth/password-reset/confirm/",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"uid\": \"uid_from_email\",\n  \"token\": \"token_from_email\",\n  \"new_password\": \"NewPass@123!\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/auth/password-change/",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"old_password\": \"OldPass@123!\",\n  \"new_password\": \"NewPass@123!\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Two-Factor Authentication (2FA)",
+      "item": [
+        {
+          "name": "2FA Setup - Get QR Code",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/auth/2fa/setup/",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ]
+          }
+        },
+        {
+          "name": "2FA Setup - Verify and Enable",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/auth/2fa/setup/",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"device_id\": 1,\n  \"code\": \"123456\"\n}"
+            }
+          }
+        },
+        {
+          "name": "2FA Verify (During Login)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/auth/2fa/verify/",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"123456\",\n  \"remember_device\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "2FA Disable",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/auth/2fa/disable/",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ]
+          }
+        },
+        {
+          "name": "2FA Status",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/auth/2fa/status/",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Tournament Management",
+      "item": [
+        {
+          "name": "List Tournaments",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/tournaments/",
+            "header": []
+          }
+        },
+        {
+          "name": "Filter Tournaments - By Status",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/tournaments/?status=REGISTRATION",
+            "header": []
+          }
+        },
+        {
+          "name": "Create Tournament",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/tournaments/",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Safi Series Valorant Tournament\",\n  \"description\": \"First-ever Safi Series Valorant tournament in Kenya!\",\n  \"game\": \"Valorant\",\n  \"format\": \"SINGLE_ELIM\",\n  \"status\": \"REGISTRATION\",\n  \"registration_start\": \"2026-07-20T00:00:00Z\",\n  \"registration_end\": \"2026-07-27T23:59:59Z\",\n  \"start_date\": \"2026-07-30T09:00:00Z\",\n  \"max_players\": 16,\n  \"min_players\": 4,\n  \"prize_pool\": 5000,\n  \"currency\": \"KES\",\n  \"prize_distribution\": [{\"rank\": 1, \"amount\": 3000}, {\"rank\": 2, \"amount\": 1500}, {\"rank\": 3, \"amount\": 500}],\n  \"is_public\": true,\n  \"is_featured\": true,\n  \"rules\": \"Standard competitive rules apply. Best of 3 for finals.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Tournament Detail",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/tournaments/{{tournament_id}}/",
+            "header": []
+          }
+        },
+        {
+          "name": "Register for Tournament",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/tournaments/{{tournament_id}}/register/",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ]
+          }
+        },
+        {
+          "name": "Get Tournament Brackets",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/tournaments/{{tournament_id}}/brackets/",
+            "header": []
+          }
+        },
+        {
+          "name": "Start Tournament",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/tournaments/{{tournament_id}}/start/",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Player Analytics",
+      "item": [
+        {
+          "name": "Get My Player Stats",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/players/stats/",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ]
+          }
+        },
+        {
+          "name": "Leaderboard - Global",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/players/leaderboard/",
+            "header": []
+          }
+        },
+        {
+          "name": "Get Match History",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/players/history/",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Community",
+      "item": [
+        {
+          "name": "List Posts",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/community/posts/",
+            "header": []
+          }
+        },
+        {
+          "name": "Create Post",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/community/posts/",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Amazing tournament! 🎮\",\n  \"content\": \"Just played in the Safi Series Valorant tournament. What an experience!\",\n  \"post_type\": \"TEXT\",\n  \"tournament\": {{tournament_id}}\n}"
+            }
+          }
+        },
+        {
+          "name": "Like Post",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/community/posts/{{post_id}}/like/",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ]
+          }
+        },
+        {
+          "name": "Comment on Post",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/community/posts/{{post_id}}/comment/",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Great tournament! Can't wait for the next one! 🏆\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Payments (M-Pesa)",
+      "item": [
+        {
+          "name": "Initiate M-Pesa Payment",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/payments/pay/",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 500,\n  \"phone_number\": \"254712345678\",\n  \"reference\": \"Tournament Registration Fee\",\n  \"tournament\": {{tournament_id}}\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Payment History",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/payments/history/",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ]
+          }
+        },
+        {
+          "name": "Withdraw Prize Money",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/payments/withdraw/",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tournament_id\": {{tournament_id}},\n  \"amount\": 3000,\n  \"phone_number\": \"254712345678\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Notifications",
+      "item": [
+        {
+          "name": "List Notifications",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/notifications/",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ]
+          }
+        },
+        {
+          "name": "Mark All Read",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/notifications/mark_all_read/",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ]
+          }
+        },
+        {
+          "name": "Unread Count",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/notifications/unread_count/",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Teams",
+      "item": [
+        {
+          "name": "List My Teams",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/teams/",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ]
+          }
+        },
+        {
+          "name": "Create Team",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/teams/",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Kenya Esports\",\n  \"tag\": \"KES\",\n  \"game\": \"Valorant\",\n  \"region\": \"EastAfrica\",\n  \"description\": \"Professional Valorant team from Kenya\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Team Leaderboard",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/teams/leaderboard/",
+            "header": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. Achievements",
+      "item": [
+        {
+          "name": "List All Achievements",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/achievements/all/",
+            "header": []
+          }
+        },
+        {
+          "name": "My Achievements",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/achievements/user/my_achievements/",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "12. Content & Education",
+      "item": [
+        {
+          "name": "List Articles",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/content/articles/",
+            "header": []
+          }
+        },
+        {
+          "name": "Featured Articles",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/content/articles/featured/",
+            "header": []
+          }
+        },
+        {
+          "name": "Get Article Detail",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/content/articles/1/",
+            "header": []
+          }
+        },
+        {
+          "name": "Create Article",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/content/articles/",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Beginner's Guide to Valorant\",\n  \"slug\": \"beginners-guide-valorant\",\n  \"content\": \"Valorant is a tactical shooter...\",\n  \"summary\": \"A complete guide for new players\",\n  \"content_type\": \"GUIDE\",\n  \"audience\": \"BEGINNER\",\n  \"reading_time\": 10\n}"
+            }
+          }
+        },
+        {
+          "name": "List Learning Paths",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/content/learning-paths/",
+            "header": []
+          }
+        },
+        {
+          "name": "Enroll in Learning Path",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/content/learning-paths/1/enroll/",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "13. Analytics",
+      "item": [
+        {
+          "name": "Platform Analytics",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/analytics/platform/",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ]
+          }
+        },
+        {
+          "name": "Tournament Analytics",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/analytics/tournament/{{tournament_id}}/",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "14. Newsletter",
+      "item": [
+        {
+          "name": "Subscribe to Newsletter",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/newsletter/subscriptions/",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"name\": \"John Doe\",\n  \"preferences\": {\"tournaments\": true, \"community\": true}\n}"
+            }
+          }
+        },
+        {
+          "name": "Unsubscribe",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/newsletter/subscriptions/unsubscribe/",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "15. Feedback",
+      "item": [
+        {
+          "name": "Submit Feedback",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/feedback/feedback/",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"FEATURE\",\n  \"subject\": \"Add tournament replay feature\",\n  \"message\": \"It would be great to have match replays available for analysis.\",\n  \"rating\": 5\n}"
+            }
+          }
+        },
+        {
+          "name": "List Surveys",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/feedback/surveys/",
+            "header": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "16. Legal",
+      "item": [
+        {
+          "name": "View Terms of Service",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/legal/documents/?type=TERMS",
+            "header": []
+          }
+        },
+        {
+          "name": "View Privacy Policy",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/legal/documents/?type=PRIVACY",
+            "header": []
+          }
+        },
+        {
+          "name": "Accept Terms and Privacy",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/v1/legal/accept-terms/",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"terms_id\": 1,\n  \"privacy_id\": 2\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "17. Admin",
+      "item": [
+        {
+          "name": "Django Admin Panel",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/admin/",
+            "header": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "18. Health Check",
+      "item": [
+        {
+          "name": "API Root",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/",
+            "header": []
+          }
+        }
+      ]
+    }
+  ]
+}
