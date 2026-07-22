@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -24,7 +25,15 @@ urlpatterns = [
     path('api/v1/feedback/', include('apps.feedback.urls')),
     path('api/v1/audit/', include('apps.audit.urls')),
     path('api/v1/legal/', include('apps.legal.urls')),
-    path('health/', include('apps.health.urls')),  # <-- ADD THIS LINE
+    path('health/', include('apps.health.urls')),
+    
+    # API Schema and Documentation
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(
+        template_name='swagger-ui.html',
+        url_name='schema'
+    ), name='swagger-ui'),
+    path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]
 
 if settings.DEBUG:

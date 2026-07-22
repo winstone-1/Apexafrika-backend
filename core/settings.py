@@ -237,3 +237,118 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+# DRF Spectacular (Swagger) Configuration
+INSTALLED_APPS += [
+    'drf_spectacular',
+]
+
+REST_FRAMEWORK.update({
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+})
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'ApexAfrika API',
+    'DESCRIPTION': '''
+ApexAfrika - Game Operations Platform for African Esports
+
+A comprehensive API for tournament management, player analytics, community engagement,
+payments, and content management for the African gaming ecosystem.
+
+Features:
+- Tournament Management
+- Player Analytics and Leaderboards
+- Community and Social Features
+- Paystack Payment Integration
+- AI-Powered Predictions (Groq)
+- JWT Authentication + Google OAuth
+- Analytics and Reporting
+- Content and Education
+- Team Management
+- Achievements and Badges
+- Scheduling and Calendar
+- Live Streaming
+- Newsletters
+- Feedback and Surveys
+- Audit Logs
+- Legal and Compliance
+
+Authentication:
+Most endpoints require JWT authentication. Include the token in the Authorization header:
+Authorization: Bearer <your_access_token>
+
+Rate Limits:
+- Anonymous: 100 requests/day
+- Authenticated: 1000 requests/day
+
+Base URL:
+https://apexafrika.com/api/v1/
+
+Contact:
+- Website: apexafrika.com
+- Email: support@apexafrika.com
+''',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SWAGGER_UI_DIST': 'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0',
+    'SWAGGER_UI_FAVICON_HREF': 'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0/favicon-32x32.png',
+    'SWAGGER_UI_SETTINGS': {
+        'deepLinking': True,
+        'persistAuthorization': True,
+        'displayOperationId': True,
+        'displayRequestDuration': True,
+        'filter': True,
+        'requestSnippetsEnabled': True,
+        'tryItOutEnabled': True,
+        'defaultModelsExpandDepth': 3,
+        'defaultModelExpandDepth': 3,
+        'docExpansion': 'none',
+        'syntaxHighlight': {
+            'activated': True,
+            'theme': 'agate',
+        },
+    },
+    'REDOC_SETTINGS': {
+        'hideHostname': False,
+        'theme': {
+            'colors': {
+                'primary': {
+                    'main': '#FFB300',
+                },
+                'secondary': {
+                    'main': '#FFB300',
+                },
+            },
+            'typography': {
+                'fontSize': '14px',
+                'lineHeight': '1.5',
+            },
+        },
+    },
+    'TAGS': [
+        {'name': 'auth', 'description': 'Authentication endpoints (Register, Login, OAuth, 2FA)'},
+        {'name': 'profile', 'description': 'User profile management'},
+        {'name': 'tournaments', 'description': 'Tournament management (CRUD, registration, brackets)'},
+        {'name': 'players', 'description': 'Player analytics, stats, and leaderboards'},
+        {'name': 'community', 'description': 'Community posts, comments, and likes'},
+        {'name': 'payments', 'description': 'Paystack payment integration'},
+        {'name': 'notifications', 'description': 'User notifications and preferences'},
+        {'name': 'chat', 'description': 'Real-time chat (WebSocket)'},
+        {'name': 'ai', 'description': 'AI-powered predictions and chat (Groq)'},
+        {'name': 'teams', 'description': 'Team management and invitations'},
+        {'name': 'achievements', 'description': 'Achievements and badges'},
+        {'name': 'schedules', 'description': 'Match scheduling and calendar'},
+        {'name': 'streaming', 'description': 'Live streaming management'},
+        {'name': 'content', 'description': 'Content articles, guides, and learning paths'},
+        {'name': 'newsletter', 'description': 'Newsletter subscriptions and campaigns'},
+        {'name': 'feedback', 'description': 'User feedback and surveys'},
+        {'name': 'analytics', 'description': 'Platform analytics and reporting'},
+        {'name': 'audit', 'description': 'Audit logs (admin only)'},
+        {'name': 'legal', 'description': 'Terms, Privacy, and Cookie consent'},
+        {'name': 'admin', 'description': 'Admin operations'},
+        {'name': 'health', 'description': 'Health checks for monitoring'},
+    ],
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SORT_OPERATIONS': True,
+    'ENABLE_DJANGO_DEPRECATED_WARNINGS': False,
+}
