@@ -5,19 +5,33 @@ echo "========================================"
 echo "🚀 APEXAFRIKA - Production Mode"
 echo "========================================"
 
-# Wait for PostgreSQL
-echo "📦 Waiting for PostgreSQL..."
-while ! nc -z ${DB_HOST} ${DB_PORT}; do
-    sleep 1
-done
-echo "✅ PostgreSQL is ready"
+# Function to check if PostgreSQL is ready
+wait_for_postgres() {
+    echo "📦 Waiting for PostgreSQL..."
+    while true; do
+        if pg_isready -h ${DB_HOST:-db} -p ${DB_PORT:-5432} -U ${DB_USER:-apexafrika_user} > /dev/null 2>&1; then
+            echo "✅ PostgreSQL is ready"
+            break
+        fi
+        sleep 2
+    done
+}
 
-# Wait for Redis
-echo "📦 Waiting for Redis..."
-while ! nc -z ${REDIS_HOST} ${REDIS_PORT}; do
-    sleep 1
-done
-echo "✅ Redis is ready"
+# Function to check if Redis is ready
+wait_for_redis() {
+    echo "📦 Waiting for Redis..."
+    while true; do
+        if redis-cli -h ${REDIS_HOST:-redis} -p ${REDIS_PORT:-6379} ping > /dev/null 2>&1; then
+            echo "✅ Redis is ready"
+            break
+        fi
+        sleep 2
+    done
+}
+
+# Wait for services
+wait_for_postgres
+wait_for_redis
 
 # Run migrations
 echo "📦 Running migrations..."
