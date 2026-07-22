@@ -15,10 +15,9 @@ class UserSerializer(serializers.ModelSerializer):
             'twitter', 'twitch', 'youtube',
             'tournaments_participated', 'tournaments_won', 
             'total_matches', 'win_rate',
-            'is_2fa_enabled',
             'date_joined', 'last_active'
         )
-        read_only_fields = ('date_joined', 'last_active', 'is_2fa_enabled')
+        read_only_fields = ('date_joined', 'last_active')
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
@@ -60,7 +59,6 @@ class LoginSerializer(serializers.Serializer):
                 'user': UserSerializer(user).data,
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
-                'requires_2fa': user.is_2fa_enabled
             }
         raise serializers.ValidationError('Invalid credentials')
 
@@ -76,12 +74,3 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
 class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField()
     new_password = serializers.CharField(validators=[validate_password])
-
-# 2FA Serializers
-class TwoFASetupSerializer(serializers.Serializer):
-    device_id = serializers.IntegerField()
-    code = serializers.CharField(max_length=6)
-
-class TwoFAVerifySerializer(serializers.Serializer):
-    code = serializers.CharField(max_length=6)
-    remember_device = serializers.BooleanField(default=False)

@@ -1,27 +1,17 @@
-# ============================================
-# APEXAFRIKA - Docker Compose (Development)
-# ============================================
-
-version: '3.8'
-
 services:
-  # PostgreSQL Database
   db:
     image: postgres:15-alpine
     container_name: apexafrika_db
-    restart: unless-stopped
     environment:
-      POSTGRES_DB: ${DB_NAME:-apexafrika_db}
-      POSTGRES_USER: ${DB_USER:-apexafrika_user}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-apexafrika_pass}
-      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_DB: apexafrika_db
+      POSTGRES_USER: apexafrika_user
+      POSTGRES_PASSWORD: apexafrika_pass
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
     ports:
-      - "${DB_PORT:-5432}:5432"
+      - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-apexafrika_user} -d ${DB_NAME:-apexafrika_db}"]
+      test: ["CMD-SHELL", "pg_isready -U apexafrika_user -d apexafrika_db"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -29,16 +19,14 @@ services:
       - apexafrika_network
     restart: unless-stopped
 
-  # Redis Cache
   redis:
     image: redis:7-alpine
     container_name: apexafrika_redis
-    restart: unless-stopped
     command: redis-server --appendonly yes
     volumes:
       - redis_data:/data
     ports:
-      - "${REDIS_PORT:-6379}:6379"
+      - "6379:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -48,31 +36,27 @@ services:
       - apexafrika_network
     restart: unless-stopped
 
-  # Django Web Application
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: production
+    build: .
     container_name: apexafrika_web
-    restart: unless-stopped
+    command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - ./staticfiles:/app/staticfiles
-      - ./media:/app/media
-      - ./logs:/app/logs
-      - ./templates:/app/templates
-      - ./core:/app/core
-      - ./apps:/app/apps
-      - ./manage.py:/app/manage.py
+      - .:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+      - log_volume:/app/logs
     ports:
-      - "${WEB_PORT:-8000}:8000"
+      - "8000:8000"
     env_file:
       - .env
     environment:
-      - DJANGO_ENV=${DJANGO_ENV:-development}
+      - DJANGO_ENV=development
       - DB_HOST=db
       - REDIS_HOST=redis
-      - DEBUG=${DEBUG:-True}
+      - DEBUG=True
+      - DB_NAME=apexafrika_db
+      - DB_USER=apexafrika_user
+      - DB_PASSWORD=apexafrika_pass
     depends_on:
       db:
         condition: service_healthy
@@ -80,30 +64,23 @@ services:
         condition: service_healthy
     networks:
       - apexafrika_network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/admin/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
     restart: unless-stopped
 
-  # Celery Worker
   celery:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: production
+    build: .
     container_name: apexafrika_celery
-    restart: unless-stopped
     command: celery -A core worker --loglevel=info --concurrency=4
     volumes:
       - .:/app
+      - log_volume:/app/logs
     env_file:
       - .env
     environment:
       - DB_HOST=db
       - REDIS_HOST=redis
+      - DB_NAME=apexafrika_db
+      - DB_USER=apexafrika_user
+      - DB_PASSWORD=apexafrika_pass
     depends_on:
       db:
         condition: service_healthy
@@ -113,22 +90,21 @@ services:
       - apexafrika_network
     restart: unless-stopped
 
-  # Celery Beat (Scheduler)
   celery-beat:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: production
+    build: .
     container_name: apexafrika_celery_beat
-    restart: unless-stopped
     command: celery -A core beat --loglevel=info
     volumes:
       - .:/app
+      - log_volume:/app/logs
     env_file:
       - .env
     environment:
       - DB_HOST=db
       - REDIS_HOST=redis
+      - DB_NAME=apexafrika_db
+      - DB_USER=apexafrika_user
+      - DB_PASSWORD=apexafrika_pass
     depends_on:
       db:
         condition: service_healthy
@@ -138,14 +114,13 @@ services:
       - apexafrika_network
     restart: unless-stopped
 
-# Volumes
 volumes:
   postgres_data:
-    driver: local
   redis_data:
-    driver: local
+  static_volume:
+  media_volume:
+  log_volume:
 
-# Networks
 networks:
   apexafrika_network:
     driver: bridge

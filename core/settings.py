@@ -32,9 +32,6 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     
-    # 2FA
-    'django_otp',
-    'django_otp.plugins.otp_static',
     
     
     # Local apps

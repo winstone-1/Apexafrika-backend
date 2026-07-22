@@ -3,8 +3,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from .views import (
     RegisterView, LoginView, ProfileView, UserListView,
     PasswordResetRequestView, PasswordResetConfirmView, ChangePasswordView,
-    google_oauth_login, TwoFASetupView, TwoFAVerifyView, 
-    TwoFADisableView, TwoFAStatusView, LogoutView
+    google_oauth_login, LogoutView
 )
 
 app_name = 'users'
@@ -27,10 +26,4 @@ urlpatterns = [
     
     # Google OAuth
     path('google-oauth/', google_oauth_login, name='google-oauth'),
-    
-    # 2FA
-    path('2fa/setup/', TwoFASetupView.as_view(), name='2fa-setup'),
-    path('2fa/verify/', TwoFAVerifyView.as_view(), name='2fa-verify'),
-    path('2fa/disable/', TwoFADisableView.as_view(), name='2fa-disable'),
-    path('2fa/status/', TwoFAStatusView.as_view(), name='2fa-status'),
 ]

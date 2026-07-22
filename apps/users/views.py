@@ -9,19 +9,15 @@ from django.utils.encoding import force_bytes, force_str
 from django.core.mail import send_mail
 from django.conf import settings
 from django.shortcuts import get_object_or_404
-from django.template.loader import render_to_string
-from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-from django_otp import devices_for_user
-from django_otp.plugins.otp_totp.models import TOTPDevice
 import qrcode
 import base64
 from io import BytesIO
 from .serializers import (
     UserSerializer, RegisterSerializer, LoginSerializer,
     PasswordResetSerializer, PasswordResetConfirmSerializer,
-    ChangePasswordSerializer, TwoFASetupSerializer, TwoFAVerifySerializer
+    ChangePasswordSerializer
 )
 
 User = get_user_model()
@@ -68,7 +64,6 @@ class PasswordResetRequestView(generics.GenericAPIView):
         user = User.objects.filter(email=email).first()
         
         if user:
-            # Generate token and send email
             token = default_token_generator.make_token(user)
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             
@@ -99,7 +94,6 @@ class PasswordResetRequestView(generics.GenericAPIView):
                 fail_silently=False
             )
         
-        # Always return success to prevent email enumeration
         return Response({
             'message': 'If an account exists with this email, a password reset link has been sent.'
         })
@@ -131,7 +125,6 @@ class PasswordResetConfirmView(generics.GenericAPIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Validate password
         try:
             validate_password(new_password, user)
         except ValidationError as e:
@@ -186,9 +179,6 @@ class ChangePasswordView(generics.GenericAPIView):
 @permission_classes([permissions.AllowAny])
 def google_oauth_login(request):
     """Handle Google OAuth login"""
-    from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
-    from allauth.socialaccount.providers.oauth2.client import OAuth2Client
-    from django.http import JsonResponse
     
     code = request.data.get('code')
     redirect_uri = request.data.get('redirect_uri')
@@ -200,7 +190,6 @@ def google_oauth_login(request):
         )
     
     try:
-        # Exchange code for access token
         import requests
         token_url = 'https://oauth2.googleapis.com/token'
         client_id = settings.SOCIALACCOUNT_PROVIDERS['google']['APP']['client_id']
@@ -223,13 +212,11 @@ def google_oauth_login(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Get user info
         userinfo_url = 'https://www.googleapis.com/oauth2/v3/userinfo'
         headers = {'Authorization': f"Bearer {token_info['access_token']}"}
         user_response = requests.get(userinfo_url, headers=headers)
         user_info = user_response.json()
         
-        # Create or get user
         email = user_info.get('email')
         if not email:
             return Response(
@@ -238,7 +225,6 @@ def google_oauth_login(request):
             )
         
         username = user_info.get('email').split('@')[0]
-        # Ensure unique username
         if User.objects.filter(username=username).exists():
             username = f"{username}_{User.objects.count()}"
         
@@ -247,7 +233,6 @@ def google_oauth_login(request):
             defaults={
                 'username': username,
                 'gamer_tag': user_info.get('name', username),
-                'avatar': user_info.get('picture', None)
             }
         )
         
@@ -255,7 +240,6 @@ def google_oauth_login(request):
             user.set_unusable_password()
             user.save()
         
-        # Generate JWT tokens
         from rest_framework_simplejwt.tokens import RefreshToken
         refresh = RefreshToken.for_user(user)
         
@@ -272,185 +256,12 @@ def google_oauth_login(request):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-# ==================== TWO-FACTOR AUTH (2FA) ====================
-
-class TwoFASetupView(generics.GenericAPIView):
-    permission_classes = [permissions.IsAuthenticated]
-    serializer_class = TwoFASetupSerializer
-
-    def get(self, request):
-        """Get 2FA setup QR code"""
-        user = request.user
-        
-        # Check if 2FA already enabled
-        if user.is_2fa_enabled:
-            return Response({
-                'message': '2FA already enabled',
-                'is_enabled': True
-            })
-        
-        # Create TOTP device
-        device = TOTPDevice.objects.create(
-            user=user,
-            name='default',
-            confirmed=False
-        )
-        
-        # Generate QR code
-        qr = qrcode.QRCode(version=1, box_size=10, border=5)
-        qr.add_data(device.config_url)
-        qr.make(fit=True)
-        
-        img = qr.make_image(fill_color="black", back_color="white")
-        buffered = BytesIO()
-        img.save(buffered, format="PNG")
-        qr_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
-        
-        return Response({
-            'device_id': device.id,
-            'secret': device.key,
-            'qr_code': f"data:image/png;base64,{qr_base64}",
-            'is_enabled': False
-        })
-
-    def post(self, request):
-        """Verify and enable 2FA"""
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        
-        device_id = serializer.validated_data['device_id']
-        code = serializer.validated_data['code']
-        
-        try:
-            device = TOTPDevice.objects.get(id=device_id, user=request.user, confirmed=False)
-        except TOTPDevice.DoesNotExist:
-            return Response(
-                {'error': 'Invalid device'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        if device.verify_token(code):
-            device.confirmed = True
-            device.save()
-            
-            # Enable 2FA for user
-            user = request.user
-            user.is_2fa_enabled = True
-            user.totp_device = device
-            user.save()
-            
-            # Generate backup codes
-            import secrets
-            backup_codes = []
-            for i in range(10):
-                backup_codes.append(secrets.token_hex(4))
-            user.backup_codes = backup_codes
-            user.save()
-            
-            return Response({
-                'message': '2FA enabled successfully',
-                'backup_codes': backup_codes,
-                'is_enabled': True
-            })
-        else:
-            return Response(
-                {'error': 'Invalid verification code'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-class TwoFAVerifyView(generics.GenericAPIView):
-    permission_classes = [permissions.IsAuthenticated]
-    serializer_class = TwoFAVerifySerializer
-
-    def post(self, request):
-        """Verify 2FA code during login"""
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        
-        user = request.user
-        code = serializer.validated_data['code']
-        remember_device = serializer.validated_data.get('remember_device', False)
-        
-        # Check if 2FA is enabled
-        if not user.is_2fa_enabled:
-            return Response(
-                {'error': '2FA is not enabled for this user'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        # Verify TOTP
-        if user.totp_device and user.totp_device.verify_token(code):
-            # Store 2FA verification in session
-            request.session['2fa_verified'] = True
-            if remember_device:
-                request.session['2fa_remember'] = True
-            
-            return Response({
-                'message': '2FA verification successful',
-                'verified': True
-            })
-        
-        # Check backup codes
-        if code in user.backup_codes:
-            # Remove used backup code
-            user.backup_codes.remove(code)
-            user.save()
-            
-            request.session['2fa_verified'] = True
-            if remember_device:
-                request.session['2fa_remember'] = True
-            
-            return Response({
-                'message': '2FA verification successful (backup code)',
-                'verified': True,
-                'backup_code_used': True
-            })
-        
-        return Response(
-            {'error': 'Invalid verification code'},
-            status=status.HTTP_400_BAD_REQUEST
-        )
-
-class TwoFADisableView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def post(self, request):
-        """Disable 2FA"""
-        user = request.user
-        
-        if not user.is_2fa_enabled:
-            return Response(
-                {'error': '2FA is not enabled'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        user.disable_2fa()
-        
-        return Response({
-            'message': '2FA disabled successfully',
-            'is_enabled': False
-        })
-
-class TwoFAStatusView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get(self, request):
-        """Get 2FA status"""
-        user = request.user
-        
-        return Response({
-            'is_enabled': user.is_2fa_enabled,
-            'has_backup_codes': len(user.backup_codes) > 0,
-            'backup_codes_count': len(user.backup_codes)
-        })
-
 # ==================== LOGOUT ====================
 
 class LogoutView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        # Clear session
         request.session.flush()
         return Response({
             'message': 'Logged out successfully'
