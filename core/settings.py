@@ -228,9 +228,7 @@ SPECTACULAR_SETTINGS = {
 # ============================================
 # Django-Q (No Redis - Use Database)
 # ============================================
-INSTALLED_APPS += ['django_q']
 
-Q_CLUSTER = {
     'name': 'apexafrika',
     'workers': 2,
     'recycle': 500,
