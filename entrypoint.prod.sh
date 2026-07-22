@@ -5,32 +5,26 @@ echo "========================================"
 echo "APEXAFRIKA - Production Mode"
 echo "========================================"
 
-# Use Render's PORT or default to 8000
 PORT=${PORT:-8000}
-
-# Check if DATABASE_URL is set
-if [ -z "$DATABASE_URL" ]; then
-    echo "WARNING: DATABASE_URL not set. Using individual DB variables."
-else
-    echo "DATABASE_URL is set."
-fi
 
 # Run migrations
 echo "Running migrations..."
-python manage.py migrate --noinput || {
-    echo "Migration failed, continuing..."
-}
+python manage.py migrate --noinput || true
 
 # Collect static files
 echo "Collecting static files..."
-python manage.py collectstatic --noinput || {
-    echo "Static collection failed, continuing..."
-}
+python manage.py collectstatic --noinput || true
 
-# Start Gunicorn on Render's PORT
+# Start Django-Q cluster in background (if not in free tier)
+if [ "$START_Q_CLUSTER" = "true" ]; then
+    echo "Starting Django-Q cluster..."
+    python manage.py qcluster &
+fi
+
+# Start Gunicorn
 echo "Starting Gunicorn on port $PORT..."
 exec gunicorn --bind 0.0.0.0:$PORT \
-    --workers ${GUNICORN_WORKERS:-4} \
+    --workers ${GUNICORN_WORKERS:-2} \
     --threads ${GUNICORN_THREADS:-2} \
     --worker-class sync \
     --max-requests 1000 \

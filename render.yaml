@@ -3,7 +3,7 @@ services:
     name: apexafrika-web
     runtime: docker
     repo: https://github.com/winstone-1/Apexafrika-backend
-    plan: starter
+    plan: free
     dockerfilePath: ./Dockerfile.prod
     dockerContext: .
     healthCheckPath: /health/
@@ -21,7 +21,7 @@ services:
       - key: DJANGO_SETTINGS_MODULE
         value: core.settings
       - key: ALLOWED_HOSTS
-        value: apexafrika.onrender.com,localhost,127.0.0.1
+        value: apexafrika-backend.onrender.com,localhost,127.0.0.1
       - key: DATABASE_URL
         fromDatabase:
           name: apexafrika-db
@@ -52,79 +52,13 @@ services:
       - key: CSRF_TRUSTED_ORIGINS
         value: https://apexafrika.com,https://www.apexafrika.com,https://api.apexafrika.com
 
-  - type: worker
-    name: apexafrika-celery
-    runtime: docker
-    repo: https://github.com/winstone-1/Apexafrika-backend
-    plan: starter
-    dockerfilePath: ./Dockerfile.prod
-    dockerContext: .
-    command: celery -A core worker --loglevel=info --concurrency=4
-    envVars:
-      - key: DJANGO_ENV
-        value: production
-      - key: DEBUG
-        value: "False"
-      - key: DJANGO_SECRET_KEY
-        generateValue: true
-      - key: DATABASE_URL
-        fromDatabase:
-          name: apexafrika-db
-          property: connectionString
-      - key: REDIS_URL
-        fromService:
-          name: apexafrika-redis
-          type: redis
-          property: connectionString
-      - key: GOOGLE_CLIENT_ID
-        sync: false
-      - key: GOOGLE_SECRET_KEY
-        sync: false
-      - key: PAYSTACK_SECRET_KEY
-        sync: false
-      - key: GROQ_API_KEY
-        sync: false
-
-  - type: worker
-    name: apexafrika-celery-beat
-    runtime: docker
-    repo: https://github.com/winstone-1/Apexafrika-backend
-    plan: starter
-    dockerfilePath: ./Dockerfile.prod
-    dockerContext: .
-    command: celery -A core beat --loglevel=info
-    envVars:
-      - key: DJANGO_ENV
-        value: production
-      - key: DEBUG
-        value: "False"
-      - key: DJANGO_SECRET_KEY
-        generateValue: true
-      - key: DATABASE_URL
-        fromDatabase:
-          name: apexafrika-db
-          property: connectionString
-      - key: REDIS_URL
-        fromService:
-          name: apexafrika-redis
-          type: redis
-          property: connectionString
-      - key: GOOGLE_CLIENT_ID
-        sync: false
-      - key: GOOGLE_SECRET_KEY
-        sync: false
-      - key: PAYSTACK_SECRET_KEY
-        sync: false
-      - key: GROQ_API_KEY
-        sync: false
-
 databases:
   - name: apexafrika-db
-    plan: starter
+    plan: free
     databaseName: apexafrika_db
     user: apexafrika_user
 
 redis:
   - name: apexafrika-redis
-    plan: starter
+    plan: free
     maxmemoryPolicy: noeviction

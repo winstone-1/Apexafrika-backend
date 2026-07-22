@@ -259,3 +259,32 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+# ============================================
+# Django-Q (Lightweight Task Queue)
+# ============================================
+
+INSTALLED_APPS += [
+    'django_q',
+]
+
+Q_CLUSTER = {
+    'name': 'apexafrika',
+    'workers': 2,
+    'recycle': 500,
+    'timeout': 60,
+    'compress': True,
+    'save_limit': 250,
+    'queue_limit': 500,
+    'cpu_affinity': 1,
+    'label': 'Django Q',
+    'redis': {
+        'host': os.getenv('REDIS_HOST', 'localhost'),
+        'port': int(os.getenv('REDIS_PORT', 6379)),
+        'db': 0,
+        'password': os.getenv('REDIS_PASSWORD', ''),
+    }
+}
+
+# Remove Celery from INSTALLED_APPS (if present)
+# Remove 'celery', from INSTALLED_APPS
