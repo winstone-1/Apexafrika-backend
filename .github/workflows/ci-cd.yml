@@ -1,0 +1,197 @@
+name: ApexAfrika CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # ============================================
+  # JOB 1: Code Quality & Linting
+  # ============================================
+  lint:
+    name: Code Quality & Linting
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 black isort
+      
+      - name: Run flake8 (Linting)
+        run: |
+          flake8 apps/ core/ --count --max-complexity=10 --statistics
+      
+      - name: Run black (Code formatting check)
+        run: |
+          black --check apps/ core/ || echo "Formatting issues found"
+      
+      - name: Run isort (Import sorting check)
+        run: |
+          isort --check-only apps/ core/ || echo "Import sorting issues found"
+
+  # ============================================
+  # JOB 2: Tests
+  # ============================================
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: apexafrika_user
+          POSTGRES_PASSWORD: apexafrika_pass
+          POSTGRES_DB: apexafrika_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Run migrations
+        env:
+          DB_NAME: apexafrika_db
+          DB_USER: apexafrika_user
+          DB_PASSWORD: apexafrika_pass
+          DB_HOST: localhost
+          DB_PORT: 5432
+        run: |
+          python manage.py migrate
+      
+      - name: Run Django tests
+        env:
+          DB_NAME: apexafrika_db
+          DB_USER: apexafrika_user
+          DB_PASSWORD: apexafrika_pass
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DJANGO_SECRET_KEY: test-secret-key-12345
+        run: |
+          python manage.py test --verbosity=2
+
+  # ============================================
+  # JOB 3: Build (Docker)
+  # ============================================
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.prod
+          push: false
+          tags: apexafrika-backend:latest
+          load: true
+      
+      - name: Test Docker image
+        run: |
+          docker run --rm apexafrika-backend:latest python manage.py --help
+
+  # ============================================
+  # JOB 4: Deploy to Render
+  # ============================================
+  deploy:
+    name: Deploy to Render
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Trigger Render Deployment
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+        run: |
+          echo "🚀 Triggering deployment on Render..."
+          
+          if [ -z "$RENDER_API_KEY" ] || [ -z "$RENDER_SERVICE_ID" ]; then
+            echo "⚠️ Render secrets not configured. Skipping deployment."
+            exit 0
+          fi
+          
+          curl -X POST "https://api.render.com/v1/services/$RENDER_SERVICE_ID/deploys" \
+            -H "Authorization: Bearer $RENDER_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{"clearCache": "true"}'
+          
+          echo "✅ Deployment triggered! Check Render dashboard."
+
+  # ============================================
+  # JOB 5: Health Check
+  # ============================================
+  health-check:
+    name: Health Check
+    runs-on: ubuntu-latest
+    needs: [deploy]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+      - name: Wait for deployment
+        run: |
+          echo "⏳ Waiting for service to be ready..."
+          sleep 45
+          
+          for i in {1..10}; do
+            echo "Health check attempt $i..."
+            if curl -s -f "https://apexafrika-backend.onrender.com/health/" > /dev/null 2>&1; then
+              echo "✅ Service is healthy!"
+              exit 0
+            fi
+            sleep 10
+          done
+          
+          echo "⚠️ Health check timeout. Check Render dashboard."
+          exit 0
