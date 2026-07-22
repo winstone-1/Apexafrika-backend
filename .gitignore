@@ -202,7 +202,6 @@ docker-compose.override.yml
 docker-compose.*.yml
 !.dockerignore
 .dockerignore
-Dockerfile.*
 *.dockerfile
 docker-compose.dev.yml
 docker-compose.prod.yml
