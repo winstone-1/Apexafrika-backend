@@ -8,49 +8,24 @@ echo "========================================"
 # Use Render's PORT or default to 8000
 PORT=${PORT:-8000}
 
-# Wait for PostgreSQL using python
-echo "Waiting for PostgreSQL..."
-python -c "
-import time
-import os
-import socket
-host = os.environ.get('DB_HOST', 'db')
-port = int(os.environ.get('DB_PORT', 5432))
-for i in range(30):
-    try:
-        with socket.create_connection((host, port), timeout=1):
-            print('PostgreSQL is ready')
-            break
-    except:
-        time.sleep(1)
-        print(f'Waiting for PostgreSQL... {i+1}/30')
-"
-
-# Wait for Redis using python
-echo "Waiting for Redis..."
-python -c "
-import time
-import os
-import socket
-host = os.environ.get('REDIS_HOST', 'redis')
-port = int(os.environ.get('REDIS_PORT', 6379))
-for i in range(30):
-    try:
-        with socket.create_connection((host, port), timeout=1):
-            print('Redis is ready')
-            break
-    except:
-        time.sleep(1)
-        print(f'Waiting for Redis... {i+1}/30')
-"
+# Check if DATABASE_URL is set
+if [ -z "$DATABASE_URL" ]; then
+    echo "WARNING: DATABASE_URL not set. Using individual DB variables."
+else
+    echo "DATABASE_URL is set."
+fi
 
 # Run migrations
 echo "Running migrations..."
-python manage.py migrate --noinput
+python manage.py migrate --noinput || {
+    echo "Migration failed, continuing..."
+}
 
 # Collect static files
 echo "Collecting static files..."
-python manage.py collectstatic --noinput
+python manage.py collectstatic --noinput || {
+    echo "Static collection failed, continuing..."
+}
 
 # Start Gunicorn on Render's PORT
 echo "Starting Gunicorn on port $PORT..."
