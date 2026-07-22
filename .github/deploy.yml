@@ -1,0 +1,112 @@
+# ============================================
+# APEXAFRIKA - GitHub Actions CI/CD
+# ============================================
+
+name: Deploy to Render
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  # ==========================================
+  # Test Job
+  # ==========================================
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: apexafrika_user
+          POSTGRES_PASSWORD: apexafrika_pass
+          POSTGRES_DB: apexafrika_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Run migrations
+        env:
+          DB_NAME: apexafrika_db
+          DB_USER: apexafrika_user
+          DB_PASSWORD: apexafrika_pass
+          DB_HOST: localhost
+          DB_PORT: 5432
+          REDIS_URL: redis://localhost:6379/0
+        run: |
+          python manage.py migrate
+      
+      - name: Run tests
+        env:
+          DB_NAME: apexafrika_db
+          DB_USER: apexafrika_user
+          DB_PASSWORD: apexafrika_pass
+          DB_HOST: localhost
+          DB_PORT: 5432
+          REDIS_URL: redis://localhost:6379/0
+        run: |
+          python manage.py test --verbosity=2
+
+  # ==========================================
+  # Deploy Job
+  # ==========================================
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Deploy to Render
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+        run: |
+          # Trigger deploy via Render API
+          curl -X POST "https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys" \
+            -H "Authorization: Bearer $RENDER_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{"clearCache": "true"}'
+          
+          echo "✅ Deployment triggered!"
+      
+      - name: Wait for Deploy
+        run: |
+          echo "⏳ Waiting for deployment to complete..."
+          sleep 30
+          echo "✅ Deploy should be complete. Check Render dashboard."

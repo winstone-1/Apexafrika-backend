@@ -1,0 +1,243 @@
+# ============================================
+# APEXAFRIKA - Render Blueprint
+# ============================================
+
+services:
+  # ==========================================
+  # Web Service (Django + Gunicorn)
+  # ==========================================
+  - type: web
+    name: apexafrika-web
+    runtime: docker
+    repo: https://github.com/winstone-1/Apexafrika-backend
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health/
+    autoDeploy: true
+    
+    envVars:
+      - key: DJANGO_ENV
+        value: production
+      - key: DEBUG
+        value: "False"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        value: apexafrika.com,www.apexafrika.com,api.apexafrika.com,apexafrika.onrender.com
+      
+      # Database
+      - key: DB_NAME
+        fromDatabase:
+          name: apexafrika-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: apexafrika-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: apexafrika-db
+          property: password
+      - key: DB_HOST
+        fromDatabase:
+          name: apexafrika-db
+          property: hostname
+      - key: DB_PORT
+        fromDatabase:
+          name: apexafrika-db
+          property: port
+      
+      # Redis
+      - key: REDIS_HOST
+        fromService:
+          name: apexafrika-redis
+          type: redis
+          property: hostname
+      - key: REDIS_PORT
+        fromService:
+          name: apexafrika-redis
+          type: redis
+          property: port
+      - key: REDIS_PASSWORD
+        fromService:
+          name: apexafrika-redis
+          type: redis
+          property: password
+      
+      # Environment Variables
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_SECRET_KEY
+        sync: false
+      - key: PAYSTACK_SECRET_KEY
+        sync: false
+      - key: PAYSTACK_PUBLIC_KEY
+        sync: false
+      - key: PAYSTACK_MERCHANT_EMAIL
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: FRONTEND_URL
+        value: https://apexafrika.com
+      - key: CSRF_TRUSTED_ORIGINS
+        value: https://apexafrika.com,https://www.apexafrika.com,https://api.apexafrika.com
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://apexafrika.com,https://www.apexafrika.com
+
+  # ==========================================
+  # Celery Worker
+  # ==========================================
+  - type: worker
+    name: apexafrika-celery
+    runtime: docker
+    repo: https://github.com/winstone-1/Apexafrika-backend
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    command: celery -A core worker --loglevel=info --concurrency=4
+    
+    envVars:
+      - key: DJANGO_ENV
+        value: production
+      - key: DEBUG
+        value: "False"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      
+      # Database
+      - key: DB_NAME
+        fromDatabase:
+          name: apexafrika-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: apexafrika-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: apexafrika-db
+          property: password
+      - key: DB_HOST
+        fromDatabase:
+          name: apexafrika-db
+          property: hostname
+      - key: DB_PORT
+        fromDatabase:
+          name: apexafrika-db
+          property: port
+      
+      # Redis
+      - key: REDIS_HOST
+        fromService:
+          name: apexafrika-redis
+          type: redis
+          property: hostname
+      - key: REDIS_PORT
+        fromService:
+          name: apexafrika-redis
+          type: redis
+          property: port
+      - key: REDIS_PASSWORD
+        fromService:
+          name: apexafrika-redis
+          type: redis
+          property: password
+      
+      # Secrets
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_SECRET_KEY
+        sync: false
+      - key: PAYSTACK_SECRET_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+
+  # ==========================================
+  # Celery Beat (Scheduler)
+  # ==========================================
+  - type: worker
+    name: apexafrika-celery-beat
+    runtime: docker
+    repo: https://github.com/winstone-1/Apexafrika-backend
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    command: celery -A core beat --loglevel=info
+    
+    envVars:
+      - key: DJANGO_ENV
+        value: production
+      - key: DEBUG
+        value: "False"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      
+      # Database
+      - key: DB_NAME
+        fromDatabase:
+          name: apexafrika-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: apexafrika-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: apexafrika-db
+          property: password
+      - key: DB_HOST
+        fromDatabase:
+          name: apexafrika-db
+          property: hostname
+      - key: DB_PORT
+        fromDatabase:
+          name: apexafrika-db
+          property: port
+      
+      # Redis
+      - key: REDIS_HOST
+        fromService:
+          name: apexafrika-redis
+          type: redis
+          property: hostname
+      - key: REDIS_PORT
+        fromService:
+          name: apexafrika-redis
+          type: redis
+          property: port
+      - key: REDIS_PASSWORD
+        fromService:
+          name: apexafrika-redis
+          type: redis
+          property: password
+      
+      # Secrets
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_SECRET_KEY
+        sync: false
+      - key: PAYSTACK_SECRET_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+
+# ==========================================
+# Databases
+# ==========================================
+databases:
+  - name: apexafrika-db
+    plan: starter
+    databaseName: apexafrika_db
+    user: apexafrika_user
+
+redis:
+  - name: apexafrika-redis
+    plan: starter
+    maxmemoryPolicy: noeviction
+    ipAllowList: []
