@@ -26,11 +26,6 @@ services:
         fromDatabase:
           name: apexafrika-db
           property: connectionString
-      - key: REDIS_URL
-        fromService:
-          name: apexafrika-redis
-          type: redis
-          property: connectionString
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: GOOGLE_SECRET_KEY
@@ -49,16 +44,9 @@ services:
         sync: false
       - key: FRONTEND_URL
         value: https://apexafrika.com
-      - key: CSRF_TRUSTED_ORIGINS
-        value: https://apexafrika.com,https://www.apexafrika.com,https://api.apexafrika.com
 
 databases:
   - name: apexafrika-db
     plan: free
     databaseName: apexafrika_db
     user: apexafrika_user
-
-redis:
-  - name: apexafrika-redis
-    plan: free
-    maxmemoryPolicy: noeviction

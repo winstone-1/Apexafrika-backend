@@ -7,21 +7,19 @@ echo "========================================"
 
 PORT=${PORT:-8000}
 
-# Wait for database (using python)
+# Wait for database
 echo "Waiting for database..."
 python -c "
 import time
 import os
 import socket
 import sys
+import re
 
-# Try DATABASE_URL first, then individual vars
 db_host = os.environ.get('DB_HOST', 'localhost')
 db_port = int(os.environ.get('DB_PORT', 5432))
 
-# If DATABASE_URL is set, parse it
 if os.environ.get('DATABASE_URL'):
-    import re
     match = re.search(r'@([^:]+):(\d+)/', os.environ.get('DATABASE_URL', ''))
     if match:
         db_host = match.group(1)
@@ -50,13 +48,6 @@ python manage.py collectstatic --noinput || true
 if [ -n "$DJANGO_SUPERUSER_USERNAME" ] && [ -n "$DJANGO_SUPERUSER_PASSWORD" ]; then
     echo "Creating superuser..."
     echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.filter(username='$DJANGO_SUPERUSER_USERNAME').exists() or User.objects.create_superuser('$DJANGO_SUPERUSER_USERNAME', '$DJANGO_SUPERUSER_EMAIL', '$DJANGO_SUPERUSER_PASSWORD')" | python manage.py shell 2>/dev/null || true
-fi
-
-# Start Django-Q cluster in background (if enabled)
-if [ "$START_Q_CLUSTER" = "true" ]; then
-    echo "Starting Django-Q cluster..."
-    python manage.py qcluster &
-    echo "Django-Q cluster started in background"
 fi
 
 # Start Gunicorn
