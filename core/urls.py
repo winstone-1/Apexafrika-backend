@@ -28,3 +28,4 @@ if settings.DEBUG:
     path('api/v1/newsletter/', include('apps.newsletter.urls')),
     path('api/v1/feedback/', include('apps.feedback.urls')),
     path('api/v1/audit/', include('apps.audit.urls')),
+    path('health/', include('apps.health.urls')),

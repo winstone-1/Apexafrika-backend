@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     
     
     # Local apps
+    'apps.health',
     'apps.users',
     'apps.tournaments',
     'apps.players',
