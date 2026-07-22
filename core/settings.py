@@ -210,35 +210,65 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # ============================================
 # DRF Spectacular (Swagger) Configuration
 # ============================================
+
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'ApexAfrika API',
+    'TITLE': 'ApexAfrika API Documentation',
     'DESCRIPTION': 'ApexAfrika - Game Operations Platform for African Esports',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+    'SERVE_PUBLIC': True,
+    'SWAGGER_UI_DIST': 'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0',
+    'SWAGGER_UI_FAVICON_HREF': 'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0/favicon-32x32.png',
     'SWAGGER_UI_SETTINGS': {
         'deepLinking': True,
         'persistAuthorization': True,
         'displayOperationId': True,
         'displayRequestDuration': True,
         'filter': True,
+        'requestSnippetsEnabled': True,
         'tryItOutEnabled': True,
+        'defaultModelsExpandDepth': 3,
+        'defaultModelExpandDepth': 3,
+        'docExpansion': 'none',
+        'syntaxHighlight': {
+            'activated': True,
+            'theme': 'agate',
+        },
     },
-}
-
-# ============================================
-# Django-Q (No Redis - Use Database)
-# ============================================
-
-    'name': 'apexafrika',
-    'workers': 2,
-    'recycle': 500,
-    'timeout': 60,
-    'compress': True,
-    'save_limit': 250,
-    'queue_limit': 500,
-    'cpu_affinity': 1,
-    'label': 'Django Q',
-    'orm': 'default',  # Use database instead of Redis
+    'REDOC_SETTINGS': {
+        'hideHostname': False,
+        'theme': {
+            'colors': {
+                'primary': {
+                    'main': '#FFB300',
+                },
+                'secondary': {
+                    'main': '#FFB300',
+                },
+            },
+            'typography': {
+                'fontSize': '14px',
+                'lineHeight': '1.5',
+            },
+        },
+    },
+    'TAGS': [
+        {'name': 'auth', 'description': 'Authentication endpoints'},
+        {'name': 'profile', 'description': 'User profile management'},
+        {'name': 'tournaments', 'description': 'Tournament management'},
+        {'name': 'players', 'description': 'Player analytics'},
+        {'name': 'community', 'description': 'Community features'},
+        {'name': 'payments', 'description': 'Paystack payments'},
+        {'name': 'notifications', 'description': 'User notifications'},
+        {'name': 'teams', 'description': 'Team management'},
+        {'name': 'achievements', 'description': 'Achievements and badges'},
+        {'name': 'content', 'description': 'Content and education'},
+        {'name': 'analytics', 'description': 'Analytics and reporting'},
+        {'name': 'health', 'description': 'Health checks'},
+    ],
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SORT_OPERATIONS': True,
+    'ENABLE_DJANGO_DEPRECATED_WARNINGS': False,
 }
 
 # ============================================
@@ -261,7 +291,7 @@ GROQ_API_KEY = os.getenv('GROQ_API_KEY', '')
 GROQ_MODEL = os.getenv('GROQ_MODEL', 'llama3-70b-8192')
 
 # ============================================
-# Channels (WebSocket) - Disabled since no Redis
+# Channels (WebSocket) - Disabled for free tier
 # ============================================
 # CHANNEL_LAYERS = {
 #     'default': {
