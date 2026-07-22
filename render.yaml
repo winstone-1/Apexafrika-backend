@@ -1,21 +1,12 @@
-# ============================================
-# APEXAFRIKA - Render Blueprint
-# ============================================
-
 services:
-  # ==========================================
-  # Web Service (Django + Gunicorn)
-  # ==========================================
   - type: web
     name: apexafrika-web
     runtime: docker
     repo: https://github.com/winstone-1/Apexafrika-backend
     plan: starter
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: ./Dockerfile.prod
     dockerContext: .
     healthCheckPath: /health/
-    autoDeploy: true
-    
     envVars:
       - key: DJANGO_ENV
         value: production
@@ -23,10 +14,14 @@ services:
         value: "False"
       - key: DJANGO_SECRET_KEY
         generateValue: true
+      - key: PORT
+        value: "8000"
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: DJANGO_SETTINGS_MODULE
+        value: core.settings
       - key: ALLOWED_HOSTS
-        value: apexafrika.com,www.apexafrika.com,api.apexafrika.com,apexafrika.onrender.com
-      
-      # Database
+        value: apexafrika.onrender.com,localhost,127.0.0.1
       - key: DB_NAME
         fromDatabase:
           name: apexafrika-db
@@ -47,8 +42,6 @@ services:
         fromDatabase:
           name: apexafrika-db
           property: port
-      
-      # Redis
       - key: REDIS_HOST
         fromService:
           name: apexafrika-redis
@@ -64,8 +57,6 @@ services:
           name: apexafrika-redis
           type: redis
           property: password
-      
-      # Environment Variables
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: GOOGLE_SECRET_KEY
@@ -86,21 +77,15 @@ services:
         value: https://apexafrika.com
       - key: CSRF_TRUSTED_ORIGINS
         value: https://apexafrika.com,https://www.apexafrika.com,https://api.apexafrika.com
-      - key: CORS_ALLOWED_ORIGINS
-        value: https://apexafrika.com,https://www.apexafrika.com
 
-  # ==========================================
-  # Celery Worker
-  # ==========================================
   - type: worker
     name: apexafrika-celery
     runtime: docker
     repo: https://github.com/winstone-1/Apexafrika-backend
     plan: starter
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: ./Dockerfile.prod
     dockerContext: .
     command: celery -A core worker --loglevel=info --concurrency=4
-    
     envVars:
       - key: DJANGO_ENV
         value: production
@@ -108,8 +93,6 @@ services:
         value: "False"
       - key: DJANGO_SECRET_KEY
         generateValue: true
-      
-      # Database
       - key: DB_NAME
         fromDatabase:
           name: apexafrika-db
@@ -130,8 +113,6 @@ services:
         fromDatabase:
           name: apexafrika-db
           property: port
-      
-      # Redis
       - key: REDIS_HOST
         fromService:
           name: apexafrika-redis
@@ -147,8 +128,6 @@ services:
           name: apexafrika-redis
           type: redis
           property: password
-      
-      # Secrets
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: GOOGLE_SECRET_KEY
@@ -158,18 +137,14 @@ services:
       - key: GROQ_API_KEY
         sync: false
 
-  # ==========================================
-  # Celery Beat (Scheduler)
-  # ==========================================
   - type: worker
     name: apexafrika-celery-beat
     runtime: docker
     repo: https://github.com/winstone-1/Apexafrika-backend
     plan: starter
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: ./Dockerfile.prod
     dockerContext: .
     command: celery -A core beat --loglevel=info
-    
     envVars:
       - key: DJANGO_ENV
         value: production
@@ -177,8 +152,6 @@ services:
         value: "False"
       - key: DJANGO_SECRET_KEY
         generateValue: true
-      
-      # Database
       - key: DB_NAME
         fromDatabase:
           name: apexafrika-db
@@ -199,8 +172,6 @@ services:
         fromDatabase:
           name: apexafrika-db
           property: port
-      
-      # Redis
       - key: REDIS_HOST
         fromService:
           name: apexafrika-redis
@@ -216,8 +187,6 @@ services:
           name: apexafrika-redis
           type: redis
           property: password
-      
-      # Secrets
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: GOOGLE_SECRET_KEY
@@ -227,9 +196,6 @@ services:
       - key: GROQ_API_KEY
         sync: false
 
-# ==========================================
-# Databases
-# ==========================================
 databases:
   - name: apexafrika-db
     plan: starter
@@ -240,4 +206,3 @@ redis:
   - name: apexafrika-redis
     plan: starter
     maxmemoryPolicy: noeviction
-    ipAllowList: []
