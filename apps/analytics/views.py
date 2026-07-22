@@ -6,7 +6,7 @@ from django.utils import timezone
 from datetime import timedelta
 from apps.tournaments.models import Tournament, Match
 from apps.players.models import PlayerStats
-from apps.payments.models import MPesaTransaction
+from apps.payments.models import PaystackTransaction
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
@@ -27,14 +27,14 @@ def platform_analytics(request):
     total_players = PlayerStats.objects.count()
     top_players = list(PlayerStats.objects.select_related('player').order_by('-win_rate')[:10])
     
-    # Revenue stats
-    total_revenue = MPesaTransaction.objects.filter(
+    # Revenue stats (using Paystack)
+    total_revenue = PaystackTransaction.objects.filter(
         status='COMPLETED',
         transaction_type='PAYMENT',
         created_at__gte=start_date
     ).aggregate(total=Sum('amount'))['total'] or 0
     
-    total_prizes = MPesaTransaction.objects.filter(
+    total_prizes = PaystackTransaction.objects.filter(
         status='COMPLETED',
         transaction_type='PRIZE',
         created_at__gte=start_date
@@ -50,8 +50,8 @@ def platform_analytics(request):
             'active_tournaments': active_tournaments,
             'completed_tournaments': completed_tournaments,
             'total_players': total_players,
-            'total_revenue': total_revenue,
-            'total_prizes': total_prizes,
+            'total_revenue': float(total_revenue) if total_revenue else 0,
+            'total_prizes': float(total_prizes) if total_prizes else 0,
         },
         'growth': {
             'new_tournaments': new_tournaments,
@@ -98,13 +98,22 @@ def tournament_analytics(request, tournament_id):
         .values('player__username', 'player__gamer_tag', 'wins', 'points', 'rank')
     )
     
+    # Payment stats
+    payment_stats = PaystackTransaction.objects.filter(
+        tournament=tournament,
+        status='COMPLETED'
+    ).aggregate(
+        total_payments=Sum('amount'),
+        count=Count('id')
+    )
+    
     return Response({
         'tournament': {
             'id': tournament.id,
             'name': tournament.name,
             'game': tournament.game,
             'status': tournament.status,
-            'prize_pool': tournament.prize_pool,
+            'prize_pool': float(tournament.prize_pool) if tournament.prize_pool else 0,
         },
         'stats': {
             'total_participants': total_participants,
@@ -114,4 +123,8 @@ def tournament_analytics(request, tournament_id):
             'completion_rate': (completed_matches / total_matches * 100) if total_matches > 0 else 0,
         },
         'top_performers': top_performers,
+        'payments': {
+            'total_payments': float(payment_stats['total_payments'] or 0),
+            'payment_count': payment_stats['count'] or 0,
+        }
     })

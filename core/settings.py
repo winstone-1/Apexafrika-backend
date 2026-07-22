@@ -35,8 +35,7 @@ INSTALLED_APPS = [
     # 2FA
     'django_otp',
     'django_otp.plugins.otp_static',
-    'django_otp.plugins.otp_totp',
-    'two_factor',
+    
     
     # Local apps
     'apps.users',
@@ -70,7 +69,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
-    'django_otp.middleware.OTPMiddleware',
+    
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -191,7 +190,7 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@apexafrika.com')
 
-# Frontend URL for email links
+# Frontend URL
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:5173')
 
 # Internationalization
@@ -210,22 +209,33 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# M-Pesa Configuration
-MPESA = {
-    'CONSUMER_KEY': os.getenv('MPESA_CONSUMER_KEY', ''),
-    'CONSUMER_SECRET': os.getenv('MPESA_CONSUMER_SECRET', ''),
-    'SHORTCODE': os.getenv('MPESA_SHORTCODE', '174379'),
-    'PASSKEY': os.getenv('MPESA_PASSKEY', ''),
-    'ENVIRONMENT': os.getenv('MPESA_ENVIRONMENT', 'sandbox'),
-    'BASE_URL': os.getenv('MPESA_BASE_URL', 'https://sandbox.safaricom.co.ke'),
+# ==================== PAYSTACK CONFIGURATION ====================
+PAYSTACK = {
+    'SECRET_KEY': os.getenv('PAYSTACK_SECRET_KEY', ''),
+    'PUBLIC_KEY': os.getenv('PAYSTACK_PUBLIC_KEY', ''),
+    'MERCHANT_EMAIL': os.getenv('PAYSTACK_MERCHANT_EMAIL', ''),
+    'ENVIRONMENT': os.getenv('PAYSTACK_ENVIRONMENT', 'test'),  # 'test' or 'live'
+    'BASE_URL': 'https://api.paystack.co',
+    'INITIALIZE_URL': 'https://api.paystack.co/transaction/initialize',
+    'VERIFY_URL': 'https://api.paystack.co/transaction/verify/',
 }
 
-# GROQ AI
+# ==================== GROQ AI ====================
 GROQ_API_KEY = os.getenv('GROQ_API_KEY', '')
 GROQ_MODEL = os.getenv('GROQ_MODEL', 'llama3-70b-8192')
 
-# Two-Factor Authentication
+# ==================== TWO-FACTOR AUTH ====================
 TWO_FACTOR_FORCE_VERIFICATION = os.getenv('TWO_FACTOR_FORCE', 'False') == 'True'
-TWO_FACTOR_VERIFICATION_REQUIRED = False  # Users can opt-in
+TWO_FACTOR_VERIFICATION_REQUIRED = False
 TWO_FACTOR_REMEMBER_DEVICE = True
-TWO_FACTOR_REMEMBER_DURATION = 30  # days
+TWO_FACTOR_REMEMBER_DURATION = 30
+
+# ==================== CHANNELS (WebSocket) ====================
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [(os.getenv('REDIS_HOST', '127.0.0.1'), 6379)],
+        },
+    },
+}

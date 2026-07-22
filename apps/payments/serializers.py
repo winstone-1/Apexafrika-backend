@@ -1,16 +1,19 @@
 from rest_framework import serializers
-from .models import MPesaTransaction, PaymentMethod
+from .models import PaystackTransaction, PaymentMethod
 from apps.users.serializers import UserSerializer
 
-class MPesaTransactionSerializer(serializers.ModelSerializer):
+class PaystackTransactionSerializer(serializers.ModelSerializer):
     user_details = UserSerializer(source='user', read_only=True)
     
     class Meta:
-        model = MPesaTransaction
+        model = PaystackTransaction
         fields = '__all__'
-        read_only_fields = ('transaction_id', 'checkout_request_id', 'merchant_request_id', 
-                           'status', 'mpesa_response', 'result_code', 'result_description', 
-                           'created_at', 'completed_at')
+        read_only_fields = (
+            'reference', 'transaction_id', 'authorization_code',
+            'status', 'gateway_response', 'payment_data',
+            'result_code', 'result_description',
+            'created_at', 'completed_at'
+        )
 
 class PaymentMethodSerializer(serializers.ModelSerializer):
     class Meta:

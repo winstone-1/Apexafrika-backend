@@ -2,105 +2,211 @@ from rest_framework import generics, permissions, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from django.conf import settings
-from .models import MPesaTransaction, PaymentMethod
-from .serializers import MPesaTransactionSerializer, PaymentMethodSerializer
+from django.shortcuts import get_object_or_404
+from .models import PaystackTransaction, PaymentMethod
+from .serializers import PaystackTransactionSerializer, PaymentMethodSerializer
 import requests
-import base64
+import json
+import uuid
 from datetime import datetime
 
-class MPesaPaymentView(generics.CreateAPIView):
+class PaystackInitializeView(generics.CreateAPIView):
+    """Initialize a Paystack payment"""
     permission_classes = [permissions.IsAuthenticated]
-    serializer_class = MPesaTransactionSerializer
+    serializer_class = PaystackTransactionSerializer
     
     def perform_create(self, serializer):
-        # Get M-Pesa access token
-        access_token = self.get_mpesa_access_token()
+        # Generate unique reference
+        reference = f"APEX-{datetime.now().strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:8]}"
         
-        # Generate timestamp
-        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+        amount = int(float(serializer.validated_data['amount']) * 100)  # Convert to kobo/cents
         
-        # Generate password
-        password = base64.b64encode(
-            f"{settings.MPESA['SHORTCODE']}{settings.MPESA['PASSKEY']}{timestamp}".encode()
-        ).decode()
-        
-        # Prepare STK push request
+        # Prepare Paystack initialization data
         payload = {
-            "BusinessShortCode": settings.MPESA['SHORTCODE'],
-            "Password": password,
-            "Timestamp": timestamp,
-            "TransactionType": "CustomerPayBillOnline",
-            "Amount": int(serializer.validated_data['amount']),
-            "PartyA": serializer.validated_data['phone_number'],
-            "PartyB": settings.MPESA['SHORTCODE'],
-            "PhoneNumber": serializer.validated_data['phone_number'],
-            "CallBackURL": "https://your-domain.com/api/v1/payments/callback/",
-            "AccountReference": f"APEX{datetime.now().strftime('%Y%m%d%H%M%S')}",
-            "TransactionDesc": "ApexAfrika Payment"
+            "email": self.request.user.email or settings.PAYSTACK.get('MERCHANT_EMAIL', ''),
+            "amount": amount,
+            "reference": reference,
+            "callback_url": f"{settings.FRONTEND_URL}/payment/callback",
+            "metadata": {
+                "username": self.request.user.username,
+                "user_id": self.request.user.id,
+                "transaction_type": serializer.validated_data.get('transaction_type', 'PAYMENT'),
+                "tournament_id": str(serializer.validated_data.get('tournament', {}).id) if serializer.validated_data.get('tournament') else None,
+            }
         }
         
-        # Send request to M-Pesa
         headers = {
-            "Authorization": f"Bearer {access_token}",
+            "Authorization": f"Bearer {settings.PAYSTACK['SECRET_KEY']}",
             "Content-Type": "application/json"
         }
         
-        response = requests.post(
-            f"{settings.MPESA['BASE_URL']}/mpesa/stkpush/v1/processrequest",
-            json=payload,
-            headers=headers
-        )
-        
-        if response.status_code == 200:
-            data = response.json()
-            if data.get('ResponseCode') == '0':
-                serializer.save(
-                    user=self.request.user,
-                    transaction_id=data.get('CheckoutRequestID'),
-                    checkout_request_id=data.get('CheckoutRequestID'),
-                    status='PROCESSING'
-                )
+        try:
+            response = requests.post(
+                settings.PAYSTACK['INITIALIZE_URL'],
+                json=payload,
+                headers=headers,
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                if data.get('status'):
+                    payment_data = data.get('data', {})
+                    
+                    # Create transaction record
+                    transaction_obj = serializer.save(
+                        user=self.request.user,
+                        reference=reference,
+                        status='PENDING',
+                        payment_data=payment_data,
+                        customer_email=self.request.user.email,
+                        gateway_response=payment_data.get('gateway_response', '')
+                    )
+                    
+                    self.response_data = {
+                        'transaction': PaystackTransactionSerializer(transaction_obj).data,
+                        'authorization_url': payment_data.get('authorization_url'),
+                        'reference': reference,
+                        'access_code': payment_data.get('access_code')
+                    }
+                else:
+                    raise serializers.ValidationError(data.get('message', 'Paystack initialization failed'))
             else:
-                raise serializers.ValidationError(data.get('ResponseDescription', 'M-Pesa request failed'))
-        else:
-            raise serializers.ValidationError('Failed to connect to M-Pesa')
+                raise serializers.ValidationError(f"Paystack API error: {response.status_code}")
+                
+        except requests.exceptions.RequestException as e:
+            raise serializers.ValidationError(f"Payment service error: {str(e)}")
     
-    def get_mpesa_access_token(self):
-        url = f"{settings.MPESA['BASE_URL']}/oauth/v1/generate?grant_type=client_credentials"
-        
-        credentials = base64.b64encode(
-            f"{settings.MPESA['CONSUMER_KEY']}:{settings.MPESA['CONSUMER_SECRET']}".encode()
-        ).decode()
-        
-        headers = {
-            "Authorization": f"Basic {credentials}",
-            "Content-Type": "application/json"
-        }
-        
-        response = requests.get(url, headers=headers)
-        
-        if response.status_code == 200:
-            return response.json().get('access_token')
-        raise Exception('Failed to get M-Pesa access token')
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(self.response_data, status=status.HTTP_200_OK)
 
-@api_view(['POST'])
-@permission_classes([permissions.AllowAny])
-def mpesa_callback(request):
-    """Handle M-Pesa callback"""
-    data = request.data
+class PaystackVerifyView(generics.GenericAPIView):
+    """Verify a Paystack payment"""
+    permission_classes = [permissions.IsAuthenticated]
     
-    # Process callback data
-    # Update transaction status based on result
-    # This would need to be implemented based on M-Pesa's callback structure
+    def get(self, request, reference):
+        try:
+            transaction_obj = get_object_or_404(PaystackTransaction, reference=reference, user=request.user)
+            
+            headers = {
+                "Authorization": f"Bearer {settings.PAYSTACK['SECRET_KEY']}",
+                "Content-Type": "application/json"
+            }
+            
+            verify_url = f"{settings.PAYSTACK['VERIFY_URL']}{reference}"
+            response = requests.get(verify_url, headers=headers, timeout=30)
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                if data.get('status'):
+                    payment_data = data.get('data', {})
+                    
+                    # Update transaction
+                    transaction_obj.status = 'COMPLETED'
+                    transaction_obj.transaction_id = str(payment_data.get('id'))
+                    
+                    # Handle authorization data safely
+                    auth_data = payment_data.get('authorization', {})
+                    if isinstance(auth_data, dict):
+                        transaction_obj.authorization_code = auth_data.get('authorization_code', '')
+                    
+                    transaction_obj.gateway_response = payment_data
+                    transaction_obj.completed_at = datetime.now()
+                    transaction_obj.save()
+                    
+                    # Save payment method for future use
+                    if isinstance(auth_data, dict) and auth_data.get('authorization_code'):
+                        PaymentMethod.objects.get_or_create(
+                            user=request.user,
+                            authorization_code=auth_data.get('authorization_code', ''),
+                            defaults={
+                                'method_type': 'CARD',
+                                'last_four': auth_data.get('last4', ''),
+                                'card_type': auth_data.get('card_type', ''),
+                                'expiry_month': auth_data.get('exp_month', ''),
+                                'expiry_year': auth_data.get('exp_year', ''),
+                                'bank': auth_data.get('bank', ''),
+                                'account_name': auth_data.get('account_name', ''),
+                                'reusable': auth_data.get('reusable', False),
+                                'is_active': True
+                            }
+                        )
+                    
+                    return Response({
+                        'status': 'success',
+                        'message': 'Payment verified successfully',
+                        'transaction': PaystackTransactionSerializer(transaction_obj).data
+                    })
+                else:
+                    transaction_obj.status = 'FAILED'
+                    transaction_obj.result_description = data.get('message', 'Verification failed')
+                    transaction_obj.save()
+                    return Response({
+                        'status': 'failed',
+                        'message': data.get('message', 'Payment verification failed')
+                    }, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({
+                    'error': f"Verification API error: {response.status_code}"
+                }, status=status.HTTP_400_BAD_REQUEST)
+                
+        except requests.exceptions.RequestException as e:
+            return Response({
+                'error': f"Verification service error: {str(e)}"
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class PaystackWebhookView(generics.GenericAPIView):
+    """Handle Paystack webhooks"""
+    permission_classes = [permissions.AllowAny]
     
-    return Response({'message': 'Callback received'}, status=status.HTTP_200_OK)
+    def post(self, request):
+        payload = request.data
+        event = payload.get('event')
+        data = payload.get('data')
+        
+        if event == 'charge.success':
+            reference = data.get('reference')
+            try:
+                transaction_obj = PaystackTransaction.objects.get(reference=reference)
+                if transaction_obj.status == 'PENDING':
+                    transaction_obj.status = 'COMPLETED'
+                    transaction_obj.transaction_id = str(data.get('id'))
+                    
+                    # Handle authorization data safely
+                    auth_data = data.get('authorization', {})
+                    if isinstance(auth_data, dict):
+                        transaction_obj.authorization_code = auth_data.get('authorization_code', '')
+                    
+                    transaction_obj.gateway_response = data
+                    transaction_obj.completed_at = datetime.now()
+                    transaction_obj.save()
+                    
+                    # Handle tournament registration
+                    if transaction_obj.transaction_type == 'PAYMENT' and transaction_obj.tournament:
+                        from apps.tournaments.models import TournamentParticipant
+                        participant, created = TournamentParticipant.objects.get_or_create(
+                            tournament=transaction_obj.tournament,
+                            player=transaction_obj.user,
+                            defaults={'status': 'REGISTERED'}
+                        )
+                        
+                    return Response({'status': 'success'}, status=status.HTTP_200_OK)
+            except PaystackTransaction.DoesNotExist:
+                return Response({'error': 'Transaction not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        return Response({'status': 'ignored'}, status=status.HTTP_200_OK)
 
 class PaymentHistoryView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
-    serializer_class = MPesaTransactionSerializer
+    serializer_class = PaystackTransactionSerializer
     
     def get_queryset(self):
-        return MPesaTransaction.objects.filter(user=self.request.user).order_by('-created_at')
+        return PaystackTransaction.objects.filter(user=self.request.user).order_by('-created_at')
 
 class PaymentMethodView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -110,38 +216,132 @@ class PaymentMethodView(generics.ListCreateAPIView):
         return PaymentMethod.objects.filter(user=self.request.user, is_active=True)
     
     def perform_create(self, serializer):
-        # If this is the first payment method, make it default
         if not PaymentMethod.objects.filter(user=self.request.user).exists():
             serializer.save(user=self.request.user, is_default=True)
         else:
             serializer.save(user=self.request.user)
 
+class PaymentMethodDeleteView(generics.DestroyAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = PaymentMethod.objects.all()
+    
+    def get_queryset(self):
+        return PaymentMethod.objects.filter(user=self.request.user)
+
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
 def withdraw_prize(request):
-    """Withdraw tournament prize money"""
+    """Withdraw tournament prize money via Paystack"""
     tournament_id = request.data.get('tournament_id')
     amount = request.data.get('amount')
-    phone_number = request.data.get('phone_number')
+    account_number = request.data.get('account_number')
+    bank_code = request.data.get('bank_code')
+    account_name = request.data.get('account_name')
     
-    if not all([tournament_id, amount, phone_number]):
+    if not all([tournament_id, amount, account_number, bank_code]):
         return Response(
-            {'error': 'tournament_id, amount, and phone_number are required'},
+            {'error': 'tournament_id, amount, account_number, and bank_code are required'},
             status=status.HTTP_400_BAD_REQUEST
         )
     
-    # Create prize payout transaction
-    transaction = MPesaTransaction.objects.create(
+    reference = f"PRIZE-{datetime.now().strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:8]}"
+    
+    transaction_obj = PaystackTransaction.objects.create(
         user=request.user,
-        transaction_id=f"WTH{datetime.now().strftime('%Y%m%d%H%M%S')}",
+        reference=reference,
         amount=amount,
-        phone_number=phone_number,
+        currency='NGN',
         transaction_type='PRIZE',
-        reference=f"Prize withdrawal for tournament {tournament_id}",
-        status='PENDING'
+        description=f"Prize withdrawal for tournament {tournament_id}",
+        status='PROCESSING'
     )
     
-    return Response({
-        'message': 'Withdrawal request initiated',
-        'transaction_id': transaction.transaction_id
-    })
+    headers = {
+        "Authorization": f"Bearer {settings.PAYSTACK['SECRET_KEY']}",
+        "Content-Type": "application/json"
+    }
+    
+    payload = {
+        "source": "balance",
+        "amount": int(float(amount) * 100),
+        "recipient": {
+            "type": "nuban",
+            "name": account_name,
+            "account_number": account_number,
+            "bank_code": bank_code,
+            "currency": "NGN"
+        },
+        "reason": f"Prize payout for tournament {tournament_id}"
+    }
+    
+    try:
+        response = requests.post(
+            f"{settings.PAYSTACK['BASE_URL']}/transfer",
+            json=payload,
+            headers=headers,
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('status'):
+                transaction_obj.status = 'COMPLETED'
+                transaction_obj.transaction_id = str(data.get('data', {}).get('id'))
+                transaction_obj.completed_at = datetime.now()
+                transaction_obj.save()
+                
+                return Response({
+                    'message': 'Withdrawal initiated successfully',
+                    'transaction_id': transaction_obj.transaction_id,
+                    'reference': reference
+                })
+            else:
+                transaction_obj.status = 'FAILED'
+                transaction_obj.result_description = data.get('message', 'Withdrawal failed')
+                transaction_obj.save()
+                return Response({
+                    'error': data.get('message', 'Withdrawal failed')
+                }, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({
+                'error': f"Paystack API error: {response.status_code}"
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
+    except requests.exceptions.RequestException as e:
+        return Response({
+            'error': f"Payment service error: {str(e)}"
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def get_banks(request):
+    """Get list of Nigerian banks for transfers"""
+    headers = {
+        "Authorization": f"Bearer {settings.PAYSTACK['SECRET_KEY']}",
+        "Content-Type": "application/json"
+    }
+    
+    try:
+        response = requests.get(
+            f"{settings.PAYSTACK['BASE_URL']}/bank",
+            headers=headers,
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('status'):
+                return Response(data.get('data', []))
+            else:
+                return Response({
+                    'error': data.get('message', 'Failed to fetch banks')
+                }, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({
+                'error': f"Paystack API error: {response.status_code}"
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
+    except requests.exceptions.RequestException as e:
+        return Response({
+            'error': f"Service error: {str(e)}"
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
