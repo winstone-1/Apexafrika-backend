@@ -10,87 +10,195 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('tournaments', '0001_initial'),
+        ("tournaments", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Stream',
+            name="Stream",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=255)),
-                ('description', models.TextField(blank=True, null=True)),
-                ('platform', models.CharField(choices=[('TWITCH', 'Twitch'), ('YOUTUBE', 'YouTube'), ('FACEBOOK', 'Facebook Gaming'), ('AFREECATV', 'AfreecaTV'), ('OTHER', 'Other')], default='TWITCH', max_length=20)),
-                ('stream_url', models.URLField()),
-                ('embed_url', models.URLField(blank=True, null=True)),
-                ('thumbnail', models.ImageField(blank=True, null=True, upload_to='stream_thumbnails/')),
-                ('status', models.CharField(choices=[('SCHEDULED', 'Scheduled'), ('LIVE', 'Live'), ('OFFLINE', 'Offline'), ('ENDED', 'Ended')], default='SCHEDULED', max_length=20)),
-                ('scheduled_start', models.DateTimeField()),
-                ('actual_start', models.DateTimeField(blank=True, null=True)),
-                ('actual_end', models.DateTimeField(blank=True, null=True)),
-                ('viewer_count', models.IntegerField(default=0)),
-                ('peak_viewers', models.IntegerField(default=0)),
-                ('total_views', models.IntegerField(default=0)),
-                ('chat_url', models.URLField(blank=True, null=True)),
-                ('recording_url', models.URLField(blank=True, null=True)),
-                ('is_featured', models.BooleanField(default=False)),
-                ('is_public', models.BooleanField(default=True)),
-                ('tags', models.JSONField(default=list)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('match', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='streams', to='tournaments.match')),
-                ('streamer', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='streams', to=settings.AUTH_USER_MODEL)),
-                ('tournament', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='streams', to='tournaments.tournament')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=255)),
+                ("description", models.TextField(blank=True, null=True)),
+                (
+                    "platform",
+                    models.CharField(
+                        choices=[
+                            ("TWITCH", "Twitch"),
+                            ("YOUTUBE", "YouTube"),
+                            ("FACEBOOK", "Facebook Gaming"),
+                            ("AFREECATV", "AfreecaTV"),
+                            ("OTHER", "Other"),
+                        ],
+                        default="TWITCH",
+                        max_length=20,
+                    ),
+                ),
+                ("stream_url", models.URLField()),
+                ("embed_url", models.URLField(blank=True, null=True)),
+                (
+                    "thumbnail",
+                    models.ImageField(
+                        blank=True, null=True, upload_to="stream_thumbnails/"
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("SCHEDULED", "Scheduled"),
+                            ("LIVE", "Live"),
+                            ("OFFLINE", "Offline"),
+                            ("ENDED", "Ended"),
+                        ],
+                        default="SCHEDULED",
+                        max_length=20,
+                    ),
+                ),
+                ("scheduled_start", models.DateTimeField()),
+                ("actual_start", models.DateTimeField(blank=True, null=True)),
+                ("actual_end", models.DateTimeField(blank=True, null=True)),
+                ("viewer_count", models.IntegerField(default=0)),
+                ("peak_viewers", models.IntegerField(default=0)),
+                ("total_views", models.IntegerField(default=0)),
+                ("chat_url", models.URLField(blank=True, null=True)),
+                ("recording_url", models.URLField(blank=True, null=True)),
+                ("is_featured", models.BooleanField(default=False)),
+                ("is_public", models.BooleanField(default=True)),
+                ("tags", models.JSONField(default=list)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "match",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="streams",
+                        to="tournaments.match",
+                    ),
+                ),
+                (
+                    "streamer",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="streams",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "tournament",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="streams",
+                        to="tournaments.tournament",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-scheduled_start'],
+                "ordering": ["-scheduled_start"],
             },
         ),
         migrations.CreateModel(
-            name='StreamAnalytics',
+            name="StreamAnalytics",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('total_viewers', models.IntegerField(default=0)),
-                ('average_viewers', models.IntegerField(default=0)),
-                ('peak_viewers', models.IntegerField(default=0)),
-                ('chat_messages', models.IntegerField(default=0)),
-                ('unique_chatters', models.IntegerField(default=0)),
-                ('follows_gained', models.IntegerField(default=0)),
-                ('subscribers_gained', models.IntegerField(default=0)),
-                ('bitrate', models.IntegerField(default=0)),
-                ('resolution', models.CharField(blank=True, max_length=50, null=True)),
-                ('fps', models.IntegerField(default=0)),
-                ('duration_minutes', models.IntegerField(default=0)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('stream', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='analytics', to='streaming.stream')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("total_viewers", models.IntegerField(default=0)),
+                ("average_viewers", models.IntegerField(default=0)),
+                ("peak_viewers", models.IntegerField(default=0)),
+                ("chat_messages", models.IntegerField(default=0)),
+                ("unique_chatters", models.IntegerField(default=0)),
+                ("follows_gained", models.IntegerField(default=0)),
+                ("subscribers_gained", models.IntegerField(default=0)),
+                ("bitrate", models.IntegerField(default=0)),
+                ("resolution", models.CharField(
+                    blank=True, max_length=50, null=True)),
+                ("fps", models.IntegerField(default=0)),
+                ("duration_minutes", models.IntegerField(default=0)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "stream",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="analytics",
+                        to="streaming.stream",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='StreamChat',
+            name="StreamChat",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('message', models.TextField()),
-                ('is_pinned', models.BooleanField(default=False)),
-                ('is_flagged', models.BooleanField(default=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('stream', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='chats', to='streaming.stream')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='stream_chats', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("message", models.TextField()),
+                ("is_pinned", models.BooleanField(default=False)),
+                ("is_flagged", models.BooleanField(default=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "stream",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="chats",
+                        to="streaming.stream",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="stream_chats",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['created_at'],
+                "ordering": ["created_at"],
             },
         ),
         migrations.AddIndex(
-            model_name='stream',
-            index=models.Index(fields=['status', 'scheduled_start'], name='streaming_s_status_5b547e_idx'),
+            model_name="stream",
+            index=models.Index(
+                fields=["status", "scheduled_start"],
+                name="streaming_s_status_5b547e_idx",
+            ),
         ),
         migrations.AddIndex(
-            model_name='stream',
-            index=models.Index(fields=['platform'], name='streaming_s_platfor_db0f55_idx'),
+            model_name="stream",
+            index=models.Index(
+                fields=["platform"], name="streaming_s_platfor_db0f55_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='stream',
-            index=models.Index(fields=['tournament'], name='streaming_s_tournam_2249c7_idx'),
+            model_name="stream",
+            index=models.Index(
+                fields=["tournament"], name="streaming_s_tournam_2249c7_idx"
+            ),
         ),
     ]

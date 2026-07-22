@@ -15,101 +15,249 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Tournament',
+            name="Tournament",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255)),
-                ('description', models.TextField()),
-                ('game', models.CharField(max_length=100)),
-                ('format', models.CharField(choices=[('SINGLE_ELIM', 'Single Elimination'), ('DOUBLE_ELIM', 'Double Elimination'), ('ROUND_ROBIN', 'Round Robin'), ('SWISS', 'Swiss System')], default='SINGLE_ELIM', max_length=20)),
-                ('status', models.CharField(choices=[('DRAFT', 'Draft'), ('REGISTRATION', 'Registration Open'), ('LIVE', 'Live'), ('COMPLETED', 'Completed'), ('CANCELLED', 'Cancelled')], default='DRAFT', max_length=20)),
-                ('registration_start', models.DateTimeField()),
-                ('registration_end', models.DateTimeField()),
-                ('start_date', models.DateTimeField()),
-                ('end_date', models.DateTimeField(blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('max_players', models.IntegerField(default=16)),
-                ('min_players', models.IntegerField(default=4)),
-                ('current_players', models.IntegerField(default=0)),
-                ('prize_pool', models.DecimalField(decimal_places=2, default=0.0, max_digits=10)),
-                ('currency', models.CharField(default='KES', max_length=10)),
-                ('prize_distribution', models.JSONField(default=list)),
-                ('banner_image', models.ImageField(blank=True, null=True, upload_to='tournament_banners/')),
-                ('rules', models.TextField(blank=True, null=True)),
-                ('is_featured', models.BooleanField(default=False)),
-                ('is_public', models.BooleanField(default=True)),
-                ('total_matches', models.IntegerField(default=0)),
-                ('total_viewers', models.IntegerField(default=0)),
-                ('organizer', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='organized_tournaments', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=255)),
+                ("description", models.TextField()),
+                ("game", models.CharField(max_length=100)),
+                (
+                    "format",
+                    models.CharField(
+                        choices=[
+                            ("SINGLE_ELIM", "Single Elimination"),
+                            ("DOUBLE_ELIM", "Double Elimination"),
+                            ("ROUND_ROBIN", "Round Robin"),
+                            ("SWISS", "Swiss System"),
+                        ],
+                        default="SINGLE_ELIM",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("DRAFT", "Draft"),
+                            ("REGISTRATION", "Registration Open"),
+                            ("LIVE", "Live"),
+                            ("COMPLETED", "Completed"),
+                            ("CANCELLED", "Cancelled"),
+                        ],
+                        default="DRAFT",
+                        max_length=20,
+                    ),
+                ),
+                ("registration_start", models.DateTimeField()),
+                ("registration_end", models.DateTimeField()),
+                ("start_date", models.DateTimeField()),
+                ("end_date", models.DateTimeField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("max_players", models.IntegerField(default=16)),
+                ("min_players", models.IntegerField(default=4)),
+                ("current_players", models.IntegerField(default=0)),
+                (
+                    "prize_pool",
+                    models.DecimalField(
+                        decimal_places=2, default=0.0, max_digits=10),
+                ),
+                ("currency", models.CharField(default="KES", max_length=10)),
+                ("prize_distribution", models.JSONField(default=list)),
+                (
+                    "banner_image",
+                    models.ImageField(
+                        blank=True, null=True, upload_to="tournament_banners/"
+                    ),
+                ),
+                ("rules", models.TextField(blank=True, null=True)),
+                ("is_featured", models.BooleanField(default=False)),
+                ("is_public", models.BooleanField(default=True)),
+                ("total_matches", models.IntegerField(default=0)),
+                ("total_viewers", models.IntegerField(default=0)),
+                (
+                    "organizer",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="organized_tournaments",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-start_date'],
+                "ordering": ["-start_date"],
             },
         ),
         migrations.CreateModel(
-            name='Match',
+            name="Match",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('round_number', models.IntegerField()),
-                ('match_number', models.IntegerField()),
-                ('player1_score', models.IntegerField(default=0)),
-                ('player2_score', models.IntegerField(default=0)),
-                ('status', models.CharField(choices=[('SCHEDULED', 'Scheduled'), ('LIVE', 'Live'), ('COMPLETED', 'Completed'), ('CANCELLED', 'Cancelled')], default='SCHEDULED', max_length=20)),
-                ('scheduled_time', models.DateTimeField()),
-                ('actual_time', models.DateTimeField(blank=True, null=True)),
-                ('bracket_position', models.IntegerField(blank=True, null=True)),
-                ('player1', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='matches_as_player1', to=settings.AUTH_USER_MODEL)),
-                ('player2', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='matches_as_player2', to=settings.AUTH_USER_MODEL)),
-                ('winner', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='matches_won', to=settings.AUTH_USER_MODEL)),
-                ('tournament', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='matches', to='tournaments.tournament')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("round_number", models.IntegerField()),
+                ("match_number", models.IntegerField()),
+                ("player1_score", models.IntegerField(default=0)),
+                ("player2_score", models.IntegerField(default=0)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("SCHEDULED", "Scheduled"),
+                            ("LIVE", "Live"),
+                            ("COMPLETED", "Completed"),
+                            ("CANCELLED", "Cancelled"),
+                        ],
+                        default="SCHEDULED",
+                        max_length=20,
+                    ),
+                ),
+                ("scheduled_time", models.DateTimeField()),
+                ("actual_time", models.DateTimeField(blank=True, null=True)),
+                ("bracket_position", models.IntegerField(blank=True, null=True)),
+                (
+                    "player1",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="matches_as_player1",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "player2",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="matches_as_player2",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "winner",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="matches_won",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "tournament",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="matches",
+                        to="tournaments.tournament",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['round_number', 'match_number'],
+                "ordering": ["round_number", "match_number"],
             },
         ),
         migrations.CreateModel(
-            name='TournamentParticipant',
+            name="TournamentParticipant",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('status', models.CharField(choices=[('REGISTERED', 'Registered'), ('CONFIRMED', 'Confirmed'), ('CHECKED_IN', 'Checked In'), ('DROPPED', 'Dropped'), ('DISQUALIFIED', 'Disqualified')], default='REGISTERED', max_length=20)),
-                ('registered_at', models.DateTimeField(auto_now_add=True)),
-                ('checked_in_at', models.DateTimeField(blank=True, null=True)),
-                ('seed', models.IntegerField(blank=True, null=True)),
-                ('wins', models.IntegerField(default=0)),
-                ('losses', models.IntegerField(default=0)),
-                ('draws', models.IntegerField(default=0)),
-                ('points', models.IntegerField(default=0)),
-                ('rank', models.IntegerField(blank=True, null=True)),
-                ('player', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='tournament_registrations', to=settings.AUTH_USER_MODEL)),
-                ('tournament', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='participants', to='tournaments.tournament')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("REGISTERED", "Registered"),
+                            ("CONFIRMED", "Confirmed"),
+                            ("CHECKED_IN", "Checked In"),
+                            ("DROPPED", "Dropped"),
+                            ("DISQUALIFIED", "Disqualified"),
+                        ],
+                        default="REGISTERED",
+                        max_length=20,
+                    ),
+                ),
+                ("registered_at", models.DateTimeField(auto_now_add=True)),
+                ("checked_in_at", models.DateTimeField(blank=True, null=True)),
+                ("seed", models.IntegerField(blank=True, null=True)),
+                ("wins", models.IntegerField(default=0)),
+                ("losses", models.IntegerField(default=0)),
+                ("draws", models.IntegerField(default=0)),
+                ("points", models.IntegerField(default=0)),
+                ("rank", models.IntegerField(blank=True, null=True)),
+                (
+                    "player",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="tournament_registrations",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "tournament",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="participants",
+                        to="tournaments.tournament",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-points', 'wins'],
+                "ordering": ["-points", "wins"],
             },
         ),
         migrations.AddIndex(
-            model_name='tournament',
-            index=models.Index(fields=['status', 'start_date'], name='tournaments_status_59e85f_idx'),
+            model_name="tournament",
+            index=models.Index(
+                fields=["status", "start_date"], name="tournaments_status_59e85f_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='tournament',
-            index=models.Index(fields=['game'], name='tournaments_game_28be85_idx'),
+            model_name="tournament",
+            index=models.Index(
+                fields=["game"],
+                name="tournaments_game_28be85_idx"),
         ),
         migrations.AddIndex(
-            model_name='tournament',
-            index=models.Index(fields=['organizer'], name='tournaments_organiz_9edce2_idx'),
+            model_name="tournament",
+            index=models.Index(
+                fields=["organizer"], name="tournaments_organiz_9edce2_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='match',
-            index=models.Index(fields=['tournament', 'status'], name='tournaments_tournam_6ddde2_idx'),
+            model_name="match",
+            index=models.Index(
+                fields=["tournament", "status"], name="tournaments_tournam_6ddde2_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='match',
-            index=models.Index(fields=['round_number'], name='tournaments_round_n_8a49fa_idx'),
+            model_name="match",
+            index=models.Index(
+                fields=["round_number"], name="tournaments_round_n_8a49fa_idx"
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='tournamentparticipant',
-            unique_together={('tournament', 'player')},
+            name="tournamentparticipant",
+            unique_together={("tournament", "player")},
         ),
     ]

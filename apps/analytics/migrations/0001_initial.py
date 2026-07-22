@@ -15,34 +15,75 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='AnalyticsDashboard',
+            name="AnalyticsDashboard",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('type', models.CharField(choices=[('TOURNAMENT', 'Tournament Analytics'), ('PLAYER', 'Player Analytics'), ('PLATFORM', 'Platform Analytics'), ('REVENUE', 'Revenue Analytics')], max_length=20)),
-                ('data', models.JSONField()),
-                ('start_date', models.DateTimeField()),
-                ('end_date', models.DateTimeField()),
-                ('generated_at', models.DateTimeField(auto_now_add=True)),
-                ('cached_until', models.DateTimeField()),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "type",
+                    models.CharField(
+                        choices=[
+                            ("TOURNAMENT", "Tournament Analytics"),
+                            ("PLAYER", "Player Analytics"),
+                            ("PLATFORM", "Platform Analytics"),
+                            ("REVENUE", "Revenue Analytics"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                ("data", models.JSONField()),
+                ("start_date", models.DateTimeField()),
+                ("end_date", models.DateTimeField()),
+                ("generated_at", models.DateTimeField(auto_now_add=True)),
+                ("cached_until", models.DateTimeField()),
             ],
             options={
-                'ordering': ['-generated_at'],
+                "ordering": ["-generated_at"],
             },
         ),
         migrations.CreateModel(
-            name='ExportReport',
+            name="ExportReport",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255)),
-                ('format', models.CharField(choices=[('CSV', 'CSV'), ('PDF', 'PDF'), ('EXCEL', 'Excel')], max_length=10)),
-                ('file', models.FileField(upload_to='reports/')),
-                ('parameters', models.JSONField(default=dict)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('is_downloaded', models.BooleanField(default=False)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='reports', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=255)),
+                (
+                    "format",
+                    models.CharField(
+                        choices=[
+                            ("CSV", "CSV"), ("PDF", "PDF"), ("EXCEL", "Excel")],
+                        max_length=10,
+                    ),
+                ),
+                ("file", models.FileField(upload_to="reports/")),
+                ("parameters", models.JSONField(default=dict)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("is_downloaded", models.BooleanField(default=False)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="reports",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at'],
+                "ordering": ["-created_at"],
             },
         ),
     ]

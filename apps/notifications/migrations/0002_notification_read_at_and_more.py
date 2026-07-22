@@ -7,58 +7,73 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('notifications', '0001_initial'),
+        ("notifications", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='notification',
-            name='read_at',
+            model_name="notification",
+            name="read_at",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='notificationpreference',
-            name='achievement_unlocks',
+            model_name="notificationpreference",
+            name="achievement_unlocks",
             field=models.BooleanField(default=True),
         ),
         migrations.AddField(
-            model_name='notificationpreference',
-            name='in_app_enabled',
+            model_name="notificationpreference",
+            name="in_app_enabled",
             field=models.BooleanField(default=True),
         ),
         migrations.AddField(
-            model_name='notificationpreference',
-            name='new_posts',
+            model_name="notificationpreference",
+            name="new_posts",
             field=models.BooleanField(default=True),
         ),
         migrations.AddField(
-            model_name='notificationpreference',
-            name='refund_notifications',
+            model_name="notificationpreference",
+            name="refund_notifications",
             field=models.BooleanField(default=True),
         ),
         migrations.AddField(
-            model_name='notificationpreference',
-            name='team_invites',
+            model_name="notificationpreference",
+            name="team_invites",
             field=models.BooleanField(default=True),
         ),
         migrations.AddField(
-            model_name='notificationpreference',
-            name='team_updates',
+            model_name="notificationpreference",
+            name="team_updates",
             field=models.BooleanField(default=True),
         ),
         migrations.AddField(
-            model_name='notificationpreference',
-            name='tournament_results',
+            model_name="notificationpreference",
+            name="tournament_results",
             field=models.BooleanField(default=True),
         ),
         migrations.AlterField(
-            model_name='notification',
-            name='type',
-            field=models.CharField(choices=[('TOURNAMENT', 'Tournament'), ('MATCH', 'Match'), ('PAYMENT', 'Payment'), ('COMMUNITY', 'Community'), ('SYSTEM', 'System'), ('ACHIEVEMENT', 'Achievement'), ('REMINDER', 'Reminder'), ('TEAM', 'Team'), ('STREAM', 'Stream')], max_length=20),
+            model_name="notification",
+            name="type",
+            field=models.CharField(
+                choices=[
+                    ("TOURNAMENT", "Tournament"),
+                    ("MATCH", "Match"),
+                    ("PAYMENT", "Payment"),
+                    ("COMMUNITY", "Community"),
+                    ("SYSTEM", "System"),
+                    ("ACHIEVEMENT", "Achievement"),
+                    ("REMINDER", "Reminder"),
+                    ("TEAM", "Team"),
+                    ("STREAM", "Stream"),
+                ],
+                max_length=20,
+            ),
         ),
         migrations.AddIndex(
-            model_name='notification',
-            index=models.Index(fields=['type'], name='notificatio_type_ea918f_idx'),
+            model_name="notification",
+            index=models.Index(
+                fields=["type"],
+                name="notificatio_type_ea918f_idx"),
         ),
     ]

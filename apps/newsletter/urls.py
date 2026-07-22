@@ -1,13 +1,19 @@
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
-from .views import NewsletterSubscriptionViewSet, NewsletterCampaignViewSet
+
+from .views import NewsletterCampaignViewSet, NewsletterSubscriptionViewSet
 
 router = DefaultRouter()
-router.register(r'subscriptions', NewsletterSubscriptionViewSet, basename='newsletter-subscription')
-router.register(r'campaigns', NewsletterCampaignViewSet, basename='newsletter-campaign')
+router.register(
+    r"subscriptions", NewsletterSubscriptionViewSet, basename="newsletter-subscription"
+)
+router.register(
+    r"campaigns",
+    NewsletterCampaignViewSet,
+    basename="newsletter-campaign")
 
-app_name = 'newsletter'
+app_name = "newsletter"
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path("", include(router.urls)),
 ]

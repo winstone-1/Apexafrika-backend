@@ -15,52 +15,122 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Team',
+            name="Team",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255)),
-                ('tag', models.CharField(max_length=10, unique=True)),
-                ('logo', models.ImageField(blank=True, null=True, upload_to='team_logos/')),
-                ('game', models.CharField(max_length=100)),
-                ('region', models.CharField(blank=True, max_length=50, null=True)),
-                ('wins', models.IntegerField(default=0)),
-                ('losses', models.IntegerField(default=0)),
-                ('matches_played', models.IntegerField(default=0)),
-                ('is_active', models.BooleanField(default=True)),
-                ('is_verified', models.BooleanField(default=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('captain', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='captained_teams', to=settings.AUTH_USER_MODEL)),
-                ('members', models.ManyToManyField(related_name='teams', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=255)),
+                ("tag", models.CharField(max_length=10, unique=True)),
+                (
+                    "logo",
+                    models.ImageField(
+                        blank=True, null=True, upload_to="team_logos/"),
+                ),
+                ("game", models.CharField(max_length=100)),
+                ("region", models.CharField(blank=True, max_length=50, null=True)),
+                ("wins", models.IntegerField(default=0)),
+                ("losses", models.IntegerField(default=0)),
+                ("matches_played", models.IntegerField(default=0)),
+                ("is_active", models.BooleanField(default=True)),
+                ("is_verified", models.BooleanField(default=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "captain",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="captained_teams",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "members",
+                    models.ManyToManyField(
+                        related_name="teams", to=settings.AUTH_USER_MODEL
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-wins'],
+                "ordering": ["-wins"],
             },
         ),
         migrations.CreateModel(
-            name='TeamInvitation',
+            name="TeamInvitation",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('status', models.CharField(choices=[('PENDING', 'Pending'), ('ACCEPTED', 'Accepted'), ('DECLINED', 'Declined'), ('EXPIRED', 'Expired')], default='PENDING', max_length=20)),
-                ('message', models.TextField(blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('expires_at', models.DateTimeField()),
-                ('responded_at', models.DateTimeField(blank=True, null=True)),
-                ('invited_by', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sent_invitations', to=settings.AUTH_USER_MODEL)),
-                ('invited_user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='received_invitations', to=settings.AUTH_USER_MODEL)),
-                ('team', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='invitations', to='teams.team')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("PENDING", "Pending"),
+                            ("ACCEPTED", "Accepted"),
+                            ("DECLINED", "Declined"),
+                            ("EXPIRED", "Expired"),
+                        ],
+                        default="PENDING",
+                        max_length=20,
+                    ),
+                ),
+                ("message", models.TextField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("expires_at", models.DateTimeField()),
+                ("responded_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "invited_by",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="sent_invitations",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "invited_user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="received_invitations",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "team",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="invitations",
+                        to="teams.team",
+                    ),
+                ),
             ],
         ),
         migrations.AddIndex(
-            model_name='team',
-            index=models.Index(fields=['game'], name='teams_team_game_d92ed6_idx'),
+            model_name="team",
+            index=models.Index(
+                fields=["game"],
+                name="teams_team_game_d92ed6_idx"),
         ),
         migrations.AddIndex(
-            model_name='team',
-            index=models.Index(fields=['region'], name='teams_team_region_4e12d6_idx'),
+            model_name="team",
+            index=models.Index(
+                fields=["region"],
+                name="teams_team_region_4e12d6_idx"),
         ),
         migrations.AlterUniqueTogether(
-            name='teaminvitation',
-            unique_together={('team', 'invited_user')},
+            name="teaminvitation",
+            unique_together={("team", "invited_user")},
         ),
     ]

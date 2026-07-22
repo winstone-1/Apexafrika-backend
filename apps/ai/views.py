@@ -6,6 +6,8 @@ from .models import AIConversation, AIMessage, AIPrediction
 from .serializers import AIConversationSerializer, AIMessageSerializer, AIPredictionSerializer
 import groq
 import json
+from django.db.models import F
+
 
 class AIConversationViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
@@ -19,7 +21,6 @@ class AIConversationViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['post'])
     def chat(self, request, pk=None):
-        """Send a message to the AI (Groq)"""
         conversation = self.get_object()
         message = request.data.get('message')
         
@@ -30,7 +31,7 @@ class AIConversationViewSet(viewsets.ModelViewSet):
             )
         
         # Save user message
-        user_message = AIMessage.objects.create(
+        AIMessage.objects.create(
             conversation=conversation,
             role='USER',
             content=message
@@ -50,7 +51,7 @@ class AIConversationViewSet(viewsets.ModelViewSet):
             client = groq.Groq(api_key=settings.GROQ_API_KEY)
             
             response = client.chat.completions.create(
-                model="llama3-70b-8192",
+                model='llama3-70b-8192',
                 messages=messages,
                 temperature=0.7,
                 max_tokens=1024,
@@ -83,12 +84,10 @@ class AIConversationViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['post'])
     def predict(self, request):
-        """Make AI predictions"""
         prediction_type = request.data.get('type')
         match_id = request.data.get('match_id')
         tournament_id = request.data.get('tournament_id')
         
-        # Build prediction context
         context = {}
         
         if match_id:
@@ -114,7 +113,7 @@ class AIConversationViewSet(viewsets.ModelViewSet):
             """
             
             response = client.chat.completions.create(
-                model="llama3-70b-8192",
+                model='llama3-70b-8192',
                 messages=[
                     {'role': 'system', 'content': 'You are a professional esports analyst. Predict match and tournament outcomes.'},
                     {'role': 'user', 'content': prompt}
@@ -125,7 +124,6 @@ class AIConversationViewSet(viewsets.ModelViewSet):
             
             prediction = json.loads(response.choices[0].message.content)
             
-            # Save prediction
             ai_prediction = AIPrediction.objects.create(
                 type=prediction_type,
                 match_id=match_id,
@@ -141,6 +139,7 @@ class AIConversationViewSet(viewsets.ModelViewSet):
                 {'error': f'Prediction error: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
 
 class AIPredictionViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.AllowAny]

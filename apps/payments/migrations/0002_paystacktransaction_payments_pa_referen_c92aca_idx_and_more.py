@@ -7,22 +7,28 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('payments', '0001_initial'),
-        ('tournaments', '0001_initial'),
+        ("payments", "0001_initial"),
+        ("tournaments", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddIndex(
-            model_name='paystacktransaction',
-            index=models.Index(fields=['reference'], name='payments_pa_referen_c92aca_idx'),
+            model_name="paystacktransaction",
+            index=models.Index(
+                fields=["reference"], name="payments_pa_referen_c92aca_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='paystacktransaction',
-            index=models.Index(fields=['user', '-created_at'], name='payments_pa_user_id_4e9932_idx'),
+            model_name="paystacktransaction",
+            index=models.Index(
+                fields=["user", "-created_at"], name="payments_pa_user_id_4e9932_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='paystacktransaction',
-            index=models.Index(fields=['status'], name='payments_pa_status_c06717_idx'),
+            model_name="paystacktransaction",
+            index=models.Index(
+                fields=["status"],
+                name="payments_pa_status_c06717_idx"),
         ),
     ]

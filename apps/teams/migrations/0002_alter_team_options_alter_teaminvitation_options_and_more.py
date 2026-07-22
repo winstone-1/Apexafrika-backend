@@ -7,56 +7,59 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('teams', '0001_initial'),
+        ("teams", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='team',
-            options={'ordering': ['-rating', '-wins']},
+            name="team",
+            options={"ordering": ["-rating", "-wins"]},
         ),
         migrations.AlterModelOptions(
-            name='teaminvitation',
-            options={'ordering': ['-created_at']},
+            name="teaminvitation",
+            options={"ordering": ["-created_at"]},
         ),
         migrations.AddField(
-            model_name='team',
-            name='banner',
-            field=models.ImageField(blank=True, null=True, upload_to='team_banners/'),
+            model_name="team",
+            name="banner",
+            field=models.ImageField(
+                blank=True, null=True, upload_to="team_banners/"),
         ),
         migrations.AddField(
-            model_name='team',
-            name='description',
+            model_name="team",
+            name="description",
             field=models.TextField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='team',
-            name='is_professional',
+            model_name="team",
+            name="is_professional",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='team',
-            name='rank',
+            model_name="team",
+            name="rank",
             field=models.IntegerField(default=0),
         ),
         migrations.AddField(
-            model_name='team',
-            name='rating',
+            model_name="team",
+            name="rating",
             field=models.FloatField(default=0.0),
         ),
         migrations.AddField(
-            model_name='team',
-            name='social_links',
+            model_name="team",
+            name="social_links",
             field=models.JSONField(default=dict),
         ),
         migrations.AddField(
-            model_name='team',
-            name='tournaments_won',
+            model_name="team",
+            name="tournaments_won",
             field=models.IntegerField(default=0),
         ),
         migrations.AddIndex(
-            model_name='team',
-            index=models.Index(fields=['is_verified'], name='teams_team_is_veri_125917_idx'),
+            model_name="team",
+            index=models.Index(
+                fields=["is_verified"], name="teams_team_is_veri_125917_idx"
+            ),
         ),
     ]

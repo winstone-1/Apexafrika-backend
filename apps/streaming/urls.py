@@ -1,14 +1,18 @@
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
-from .views import StreamViewSet, StreamChatViewSet, StreamAnalyticsViewSet
+
+from .views import StreamAnalyticsViewSet, StreamChatViewSet, StreamViewSet
 
 router = DefaultRouter()
-router.register(r'streams', StreamViewSet, basename='stream')
-router.register(r'chats', StreamChatViewSet, basename='stream-chat')
-router.register(r'analytics', StreamAnalyticsViewSet, basename='stream-analytics')
+router.register(r"streams", StreamViewSet, basename="stream")
+router.register(r"chats", StreamChatViewSet, basename="stream-chat")
+router.register(
+    r"analytics",
+    StreamAnalyticsViewSet,
+    basename="stream-analytics")
 
-app_name = 'streaming'
+app_name = "streaming"
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path("", include(router.urls)),
 ]

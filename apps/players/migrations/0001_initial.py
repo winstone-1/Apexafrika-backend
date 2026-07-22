@@ -16,51 +16,109 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='PlayerMatchHistory',
+            name="PlayerMatchHistory",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('score', models.IntegerField()),
-                ('opponent_score', models.IntegerField()),
-                ('did_win', models.BooleanField()),
-                ('kills', models.IntegerField(default=0)),
-                ('deaths', models.IntegerField(default=0)),
-                ('assists', models.IntegerField(default=0)),
-                ('headshots', models.IntegerField(default=0)),
-                ('accuracy', models.FloatField(default=0.0)),
-                ('damage_done', models.IntegerField(default=0)),
-                ('performance_metrics', models.JSONField(default=dict)),
-                ('played_at', models.DateTimeField(auto_now_add=True)),
-                ('opponent', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='match_history_as_opponent', to=settings.AUTH_USER_MODEL)),
-                ('player', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='match_history', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("score", models.IntegerField()),
+                ("opponent_score", models.IntegerField()),
+                ("did_win", models.BooleanField()),
+                ("kills", models.IntegerField(default=0)),
+                ("deaths", models.IntegerField(default=0)),
+                ("assists", models.IntegerField(default=0)),
+                ("headshots", models.IntegerField(default=0)),
+                ("accuracy", models.FloatField(default=0.0)),
+                ("damage_done", models.IntegerField(default=0)),
+                ("performance_metrics", models.JSONField(default=dict)),
+                ("played_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "opponent",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="match_history_as_opponent",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "player",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="match_history",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-played_at'],
-                'indexes': [models.Index(fields=['player', '-played_at'], name='players_pla_player__fb4f1d_idx')],
+                "ordering": ["-played_at"],
+                "indexes": [
+                    models.Index(
+                        fields=["player", "-played_at"],
+                        name="players_pla_player__fb4f1d_idx",
+                    )
+                ],
             },
         ),
         migrations.CreateModel(
-            name='PlayerStats',
+            name="PlayerStats",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('total_matches', models.IntegerField(default=0)),
-                ('total_wins', models.IntegerField(default=0)),
-                ('total_losses', models.IntegerField(default=0)),
-                ('win_rate', models.FloatField(default=0.0, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(100)])),
-                ('tournaments_played', models.IntegerField(default=0)),
-                ('tournaments_won', models.IntegerField(default=0)),
-                ('top_3_finishes', models.IntegerField(default=0)),
-                ('game_stats', models.JSONField(default=dict)),
-                ('current_win_streak', models.IntegerField(default=0)),
-                ('longest_win_streak', models.IntegerField(default=0)),
-                ('global_rank', models.IntegerField(blank=True, null=True)),
-                ('regional_rank', models.IntegerField(blank=True, null=True)),
-                ('region', models.CharField(blank=True, max_length=50, null=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('player', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='stats', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("total_matches", models.IntegerField(default=0)),
+                ("total_wins", models.IntegerField(default=0)),
+                ("total_losses", models.IntegerField(default=0)),
+                (
+                    "win_rate",
+                    models.FloatField(
+                        default=0.0,
+                        validators=[
+                            django.core.validators.MinValueValidator(0),
+                            django.core.validators.MaxValueValidator(100),
+                        ],
+                    ),
+                ),
+                ("tournaments_played", models.IntegerField(default=0)),
+                ("tournaments_won", models.IntegerField(default=0)),
+                ("top_3_finishes", models.IntegerField(default=0)),
+                ("game_stats", models.JSONField(default=dict)),
+                ("current_win_streak", models.IntegerField(default=0)),
+                ("longest_win_streak", models.IntegerField(default=0)),
+                ("global_rank", models.IntegerField(blank=True, null=True)),
+                ("regional_rank", models.IntegerField(blank=True, null=True)),
+                ("region", models.CharField(blank=True, max_length=50, null=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "player",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="stats",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-win_rate', '-total_wins'],
-                'indexes': [models.Index(fields=['-win_rate'], name='players_pla_win_rat_a6b7fa_idx'), models.Index(fields=['region'], name='players_pla_region_83080e_idx')],
+                "ordering": ["-win_rate", "-total_wins"],
+                "indexes": [
+                    models.Index(
+                        fields=["-win_rate"], name="players_pla_win_rat_a6b7fa_idx"
+                    ),
+                    models.Index(
+                        fields=["region"], name="players_pla_region_83080e_idx"
+                    ),
+                ],
             },
         ),
     ]

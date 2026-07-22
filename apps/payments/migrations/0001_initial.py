@@ -11,58 +11,166 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('tournaments', '0001_initial'),
+        ("tournaments", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='PaymentMethod',
+            name="PaymentMethod",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('method_type', models.CharField(choices=[('CARD', 'Card'), ('BANK', 'Bank Transfer'), ('USSD', 'USSD'), ('QR', 'QR Code')], default='CARD', max_length=10)),
-                ('authorization_code', models.CharField(blank=True, max_length=255, null=True)),
-                ('card_type', models.CharField(blank=True, max_length=20, null=True)),
-                ('last_four', models.CharField(blank=True, max_length=4, null=True)),
-                ('expiry_month', models.CharField(blank=True, max_length=2, null=True)),
-                ('expiry_year', models.CharField(blank=True, max_length=4, null=True)),
-                ('bank', models.CharField(blank=True, max_length=100, null=True)),
-                ('account_name', models.CharField(blank=True, max_length=255, null=True)),
-                ('reusable', models.BooleanField(default=True)),
-                ('is_default', models.BooleanField(default=False)),
-                ('is_active', models.BooleanField(default=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='payment_methods', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "method_type",
+                    models.CharField(
+                        choices=[
+                            ("CARD", "Card"),
+                            ("BANK", "Bank Transfer"),
+                            ("USSD", "USSD"),
+                            ("QR", "QR Code"),
+                        ],
+                        default="CARD",
+                        max_length=10,
+                    ),
+                ),
+                (
+                    "authorization_code",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                ("card_type", models.CharField(blank=True, max_length=20, null=True)),
+                ("last_four", models.CharField(blank=True, max_length=4, null=True)),
+                ("expiry_month", models.CharField(
+                    blank=True, max_length=2, null=True)),
+                ("expiry_year", models.CharField(
+                    blank=True, max_length=4, null=True)),
+                ("bank", models.CharField(blank=True, max_length=100, null=True)),
+                (
+                    "account_name",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                ("reusable", models.BooleanField(default=True)),
+                ("is_default", models.BooleanField(default=False)),
+                ("is_active", models.BooleanField(default=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="payment_methods",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-is_default', '-created_at'],
+                "ordering": ["-is_default", "-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='PaystackTransaction',
+            name="PaystackTransaction",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('reference', models.CharField(max_length=255, unique=True)),
-                ('transaction_id', models.CharField(blank=True, max_length=255, null=True)),
-                ('authorization_code', models.CharField(blank=True, max_length=255, null=True)),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=10, validators=[django.core.validators.MinValueValidator(0.01)])),
-                ('currency', models.CharField(default='NGN', max_length=10)),
-                ('status', models.CharField(choices=[('PENDING', 'Pending'), ('PROCESSING', 'Processing'), ('COMPLETED', 'Completed'), ('FAILED', 'Failed'), ('CANCELLED', 'Cancelled'), ('REFUNDED', 'Refunded')], default='PENDING', max_length=20)),
-                ('transaction_type', models.CharField(choices=[('PAYMENT', 'Payment'), ('WITHDRAWAL', 'Withdrawal'), ('REFUND', 'Refund'), ('PRIZE', 'Prize Payout')], default='PAYMENT', max_length=20)),
-                ('description', models.CharField(blank=True, max_length=255, null=True)),
-                ('gateway_response', models.JSONField(blank=True, null=True)),
-                ('payment_data', models.JSONField(blank=True, null=True)),
-                ('result_code', models.CharField(blank=True, max_length=10, null=True)),
-                ('result_description', models.TextField(blank=True, null=True)),
-                ('customer_email', models.EmailField(blank=True, max_length=254, null=True)),
-                ('customer_phone', models.CharField(blank=True, max_length=20, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('completed_at', models.DateTimeField(blank=True, null=True)),
-                ('tournament', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='tournaments.tournament')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='paystack_transactions', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("reference", models.CharField(max_length=255, unique=True)),
+                (
+                    "transaction_id",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                (
+                    "authorization_code",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                (
+                    "amount",
+                    models.DecimalField(
+                        decimal_places=2,
+                        max_digits=10,
+                        validators=[
+                            django.core.validators.MinValueValidator(0.01)],
+                    ),
+                ),
+                ("currency", models.CharField(default="NGN", max_length=10)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("PENDING", "Pending"),
+                            ("PROCESSING", "Processing"),
+                            ("COMPLETED", "Completed"),
+                            ("FAILED", "Failed"),
+                            ("CANCELLED", "Cancelled"),
+                            ("REFUNDED", "Refunded"),
+                        ],
+                        default="PENDING",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "transaction_type",
+                    models.CharField(
+                        choices=[
+                            ("PAYMENT", "Payment"),
+                            ("WITHDRAWAL", "Withdrawal"),
+                            ("REFUND", "Refund"),
+                            ("PRIZE", "Prize Payout"),
+                        ],
+                        default="PAYMENT",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "description",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                ("gateway_response", models.JSONField(blank=True, null=True)),
+                ("payment_data", models.JSONField(blank=True, null=True)),
+                ("result_code", models.CharField(
+                    blank=True, max_length=10, null=True)),
+                ("result_description", models.TextField(blank=True, null=True)),
+                (
+                    "customer_email",
+                    models.EmailField(blank=True, max_length=254, null=True),
+                ),
+                (
+                    "customer_phone",
+                    models.CharField(blank=True, max_length=20, null=True),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("completed_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "tournament",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="tournaments.tournament",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="paystack_transactions",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at'],
+                "ordering": ["-created_at"],
             },
         ),
     ]

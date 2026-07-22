@@ -15,40 +15,134 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='SystemLog',
+            name="SystemLog",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('severity', models.CharField(choices=[('INFO', 'Info'), ('WARNING', 'Warning'), ('ERROR', 'Error'), ('CRITICAL', 'Critical'), ('DEBUG', 'Debug')], max_length=10)),
-                ('message', models.TextField()),
-                ('source', models.CharField(max_length=255)),
-                ('stack_trace', models.TextField(blank=True, null=True)),
-                ('metadata', models.JSONField(default=dict)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "severity",
+                    models.CharField(
+                        choices=[
+                            ("INFO", "Info"),
+                            ("WARNING", "Warning"),
+                            ("ERROR", "Error"),
+                            ("CRITICAL", "Critical"),
+                            ("DEBUG", "Debug"),
+                        ],
+                        max_length=10,
+                    ),
+                ),
+                ("message", models.TextField()),
+                ("source", models.CharField(max_length=255)),
+                ("stack_trace", models.TextField(blank=True, null=True)),
+                ("metadata", models.JSONField(default=dict)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
             ],
             options={
-                'ordering': ['-created_at'],
+                "ordering": ["-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='AuditLog',
+            name="AuditLog",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('action', models.CharField(choices=[('CREATE', 'Create'), ('UPDATE', 'Update'), ('DELETE', 'Delete'), ('VIEW', 'View'), ('LOGIN', 'Login'), ('LOGOUT', 'Logout'), ('REGISTER', 'Register'), ('PAYMENT', 'Payment'), ('PERMISSION', 'Permission Change'), ('EXPORT', 'Export'), ('IMPORT', 'Import'), ('SYSTEM', 'System'), ('ERROR', 'Error')], max_length=20)),
-                ('module', models.CharField(choices=[('AUTH', 'Authentication'), ('TOURNAMENT', 'Tournament'), ('PLAYER', 'Player'), ('PAYMENT', 'Payment'), ('COMMUNITY', 'Community'), ('TEAM', 'Team'), ('ANALYTICS', 'Analytics'), ('SYSTEM', 'System'), ('ADMIN', 'Admin'), ('AI', 'AI'), ('CONTENT', 'Content')], max_length=20)),
-                ('object_id', models.CharField(blank=True, max_length=100, null=True)),
-                ('object_type', models.CharField(blank=True, max_length=100, null=True)),
-                ('changes', models.JSONField(default=dict)),
-                ('ip_address', models.GenericIPAddressField(blank=True, null=True)),
-                ('user_agent', models.TextField(blank=True, null=True)),
-                ('referer', models.URLField(blank=True, null=True)),
-                ('status_code', models.IntegerField(blank=True, null=True)),
-                ('error_message', models.TextField(blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('user', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='audit_logs', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "action",
+                    models.CharField(
+                        choices=[
+                            ("CREATE", "Create"),
+                            ("UPDATE", "Update"),
+                            ("DELETE", "Delete"),
+                            ("VIEW", "View"),
+                            ("LOGIN", "Login"),
+                            ("LOGOUT", "Logout"),
+                            ("REGISTER", "Register"),
+                            ("PAYMENT", "Payment"),
+                            ("PERMISSION", "Permission Change"),
+                            ("EXPORT", "Export"),
+                            ("IMPORT", "Import"),
+                            ("SYSTEM", "System"),
+                            ("ERROR", "Error"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "module",
+                    models.CharField(
+                        choices=[
+                            ("AUTH", "Authentication"),
+                            ("TOURNAMENT", "Tournament"),
+                            ("PLAYER", "Player"),
+                            ("PAYMENT", "Payment"),
+                            ("COMMUNITY", "Community"),
+                            ("TEAM", "Team"),
+                            ("ANALYTICS", "Analytics"),
+                            ("SYSTEM", "System"),
+                            ("ADMIN", "Admin"),
+                            ("AI", "AI"),
+                            ("CONTENT", "Content"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                ("object_id", models.CharField(
+                    blank=True, max_length=100, null=True)),
+                (
+                    "object_type",
+                    models.CharField(blank=True, max_length=100, null=True),
+                ),
+                ("changes", models.JSONField(default=dict)),
+                ("ip_address", models.GenericIPAddressField(blank=True, null=True)),
+                ("user_agent", models.TextField(blank=True, null=True)),
+                ("referer", models.URLField(blank=True, null=True)),
+                ("status_code", models.IntegerField(blank=True, null=True)),
+                ("error_message", models.TextField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="audit_logs",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at'],
-                'indexes': [models.Index(fields=['user', '-created_at'], name='audit_audit_user_id_429f6b_idx'), models.Index(fields=['action', 'module'], name='audit_audit_action_72b113_idx'), models.Index(fields=['-created_at'], name='audit_audit_created_6e540c_idx'), models.Index(fields=['object_type', 'object_id'], name='audit_audit_object__1f9df3_idx')],
+                "ordering": ["-created_at"],
+                "indexes": [
+                    models.Index(
+                        fields=["user", "-created_at"],
+                        name="audit_audit_user_id_429f6b_idx",
+                    ),
+                    models.Index(
+                        fields=["action", "module"],
+                        name="audit_audit_action_72b113_idx",
+                    ),
+                    models.Index(
+                        fields=["-created_at"], name="audit_audit_created_6e540c_idx"
+                    ),
+                    models.Index(
+                        fields=["object_type", "object_id"],
+                        name="audit_audit_object__1f9df3_idx",
+                    ),
+                ],
             },
         ),
     ]

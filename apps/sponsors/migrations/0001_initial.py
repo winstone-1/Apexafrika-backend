@@ -9,43 +9,100 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('tournaments', '0001_initial'),
+        ("tournaments", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Sponsor',
+            name="Sponsor",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255)),
-                ('type', models.CharField(choices=[('BRAND', 'Brand'), ('INDIVIDUAL', 'Individual'), ('ORGANIZATION', 'Organization')], max_length=20)),
-                ('logo', models.ImageField(blank=True, null=True, upload_to='sponsor_logos/')),
-                ('website', models.URLField(blank=True, null=True)),
-                ('description', models.TextField(blank=True, null=True)),
-                ('email', models.EmailField(blank=True, max_length=254, null=True)),
-                ('phone', models.CharField(blank=True, max_length=20, null=True)),
-                ('is_active', models.BooleanField(default=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=255)),
+                (
+                    "type",
+                    models.CharField(
+                        choices=[
+                            ("BRAND", "Brand"),
+                            ("INDIVIDUAL", "Individual"),
+                            ("ORGANIZATION", "Organization"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "logo",
+                    models.ImageField(
+                        blank=True, null=True, upload_to="sponsor_logos/"
+                    ),
+                ),
+                ("website", models.URLField(blank=True, null=True)),
+                ("description", models.TextField(blank=True, null=True)),
+                ("email", models.EmailField(blank=True, max_length=254, null=True)),
+                ("phone", models.CharField(blank=True, max_length=20, null=True)),
+                ("is_active", models.BooleanField(default=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
             ],
         ),
         migrations.CreateModel(
-            name='Sponsorship',
+            name="Sponsorship",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('tier', models.CharField(choices=[('TITLE', 'Title'), ('GOLD', 'Gold'), ('SILVER', 'Silver'), ('BRONZE', 'Bronze'), ('PARTNER', 'Partner')], max_length=20)),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('currency', models.CharField(default='KES', max_length=10)),
-                ('benefits', models.JSONField(default=list)),
-                ('start_date', models.DateTimeField()),
-                ('end_date', models.DateTimeField()),
-                ('is_active', models.BooleanField(default=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('sponsor', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sponsorships', to='sponsors.sponsor')),
-                ('tournament', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sponsorships', to='tournaments.tournament')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "tier",
+                    models.CharField(
+                        choices=[
+                            ("TITLE", "Title"),
+                            ("GOLD", "Gold"),
+                            ("SILVER", "Silver"),
+                            ("BRONZE", "Bronze"),
+                            ("PARTNER", "Partner"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=10)),
+                ("currency", models.CharField(default="KES", max_length=10)),
+                ("benefits", models.JSONField(default=list)),
+                ("start_date", models.DateTimeField()),
+                ("end_date", models.DateTimeField()),
+                ("is_active", models.BooleanField(default=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "sponsor",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="sponsorships",
+                        to="sponsors.sponsor",
+                    ),
+                ),
+                (
+                    "tournament",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="sponsorships",
+                        to="tournaments.tournament",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-amount'],
+                "ordering": ["-amount"],
             },
         ),
     ]

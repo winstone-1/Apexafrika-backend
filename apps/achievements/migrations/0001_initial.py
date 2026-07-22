@@ -15,34 +15,94 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Achievement',
+            name="Achievement",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255)),
-                ('description', models.TextField()),
-                ('category', models.CharField(choices=[('TOURNAMENT', 'Tournament'), ('MATCH', 'Match'), ('COMMUNITY', 'Community'), ('STREAK', 'Streak'), ('MILESTONE', 'Milestone'), ('SPECIAL', 'Special')], max_length=20)),
-                ('tier', models.CharField(choices=[('BRONZE', 'Bronze'), ('SILVER', 'Silver'), ('GOLD', 'Gold'), ('PLATINUM', 'Platinum'), ('DIAMOND', 'Diamond')], default='BRONZE', max_length=20)),
-                ('icon', models.ImageField(blank=True, null=True, upload_to='achievement_icons/')),
-                ('points', models.IntegerField(default=10)),
-                ('required_wins', models.IntegerField(default=0)),
-                ('required_matches', models.IntegerField(default=0)),
-                ('required_tournaments', models.IntegerField(default=0)),
-                ('required_streak', models.IntegerField(default=0)),
-                ('is_active', models.BooleanField(default=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=255)),
+                ("description", models.TextField()),
+                (
+                    "category",
+                    models.CharField(
+                        choices=[
+                            ("TOURNAMENT", "Tournament"),
+                            ("MATCH", "Match"),
+                            ("COMMUNITY", "Community"),
+                            ("STREAK", "Streak"),
+                            ("MILESTONE", "Milestone"),
+                            ("SPECIAL", "Special"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "tier",
+                    models.CharField(
+                        choices=[
+                            ("BRONZE", "Bronze"),
+                            ("SILVER", "Silver"),
+                            ("GOLD", "Gold"),
+                            ("PLATINUM", "Platinum"),
+                            ("DIAMOND", "Diamond"),
+                        ],
+                        default="BRONZE",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "icon",
+                    models.ImageField(
+                        blank=True, null=True, upload_to="achievement_icons/"
+                    ),
+                ),
+                ("points", models.IntegerField(default=10)),
+                ("required_wins", models.IntegerField(default=0)),
+                ("required_matches", models.IntegerField(default=0)),
+                ("required_tournaments", models.IntegerField(default=0)),
+                ("required_streak", models.IntegerField(default=0)),
+                ("is_active", models.BooleanField(default=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
             ],
         ),
         migrations.CreateModel(
-            name='UserAchievement',
+            name="UserAchievement",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('unlocked_at', models.DateTimeField(auto_now_add=True)),
-                ('achievement', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='achievements.achievement')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='achievements', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("unlocked_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "achievement",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="achievements.achievement",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="achievements",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-unlocked_at'],
-                'unique_together': {('user', 'achievement')},
+                "ordering": ["-unlocked_at"],
+                "unique_together": {("user", "achievement")},
             },
         ),
     ]

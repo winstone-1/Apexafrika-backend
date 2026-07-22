@@ -8,34 +8,58 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ai', '0001_initial'),
-        ('teams', '0002_alter_team_options_alter_teaminvitation_options_and_more'),
-        ('tournaments', '0001_initial'),
+        ("ai", "0001_initial"),
+        ("teams", "0002_alter_team_options_alter_teaminvitation_options_and_more"),
+        ("tournaments", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='aiprediction',
-            name='team',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='teams.team'),
+            model_name="aiprediction",
+            name="team",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="teams.team",
+            ),
         ),
         migrations.AlterField(
-            model_name='aiprediction',
-            name='player',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='ai_predictions', to=settings.AUTH_USER_MODEL),
+            model_name="aiprediction",
+            name="player",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="ai_predictions",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AlterField(
-            model_name='aiprediction',
-            name='type',
-            field=models.CharField(choices=[('MATCH_WINNER', 'Match Winner'), ('TOURNAMENT_WINNER', 'Tournament Winner'), ('PLAYER_PERFORMANCE', 'Player Performance'), ('MATCH_SCORE', 'Match Score'), ('TEAM_PERFORMANCE', 'Team Performance')], max_length=20),
+            model_name="aiprediction",
+            name="type",
+            field=models.CharField(
+                choices=[
+                    ("MATCH_WINNER", "Match Winner"),
+                    ("TOURNAMENT_WINNER", "Tournament Winner"),
+                    ("PLAYER_PERFORMANCE", "Player Performance"),
+                    ("MATCH_SCORE", "Match Score"),
+                    ("TEAM_PERFORMANCE", "Team Performance"),
+                ],
+                max_length=20,
+            ),
         ),
         migrations.AddIndex(
-            model_name='aiprediction',
-            index=models.Index(fields=['type'], name='ai_aipredic_type_dac731_idx'),
+            model_name="aiprediction",
+            index=models.Index(
+                fields=["type"],
+                name="ai_aipredic_type_dac731_idx"),
         ),
         migrations.AddIndex(
-            model_name='aiprediction',
-            index=models.Index(fields=['-created_at'], name='ai_aipredic_created_06f5f3_idx'),
+            model_name="aiprediction",
+            index=models.Index(
+                fields=["-created_at"], name="ai_aipredic_created_06f5f3_idx"
+            ),
         ),
     ]
