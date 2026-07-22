@@ -7,6 +7,23 @@ echo "========================================"
 
 PORT=${PORT:-8000}
 
+# Check if DATABASE_URL is set
+if [ -z "$DATABASE_URL" ]; then
+    echo "ERROR: DATABASE_URL is not set!"
+    echo "Please add DATABASE_URL to your environment variables."
+    echo "Current environment variables:"
+    env | grep -E "DATABASE|DB_|POSTGRES" || echo "No database env vars found"
+    exit 1
+fi
+
+echo "DATABASE_URL is set."
+
+# Show database connection info (hide password)
+DB_HOST=$(echo $DATABASE_URL | sed -n 's/.*@\([^:]*\):.*/\1/p')
+DB_PORT=$(echo $DATABASE_URL | sed -n 's/.*:\([0-9]*\)\/.*/\1/p')
+echo "Database host: $DB_HOST"
+echo "Database port: $DB_PORT"
+
 # Wait for database
 echo "Waiting for database..."
 python -c "
@@ -16,23 +33,24 @@ import socket
 import sys
 import re
 
-db_host = os.environ.get('DB_HOST', 'localhost')
-db_port = int(os.environ.get('DB_PORT', 5432))
+db_url = os.environ.get('DATABASE_URL', '')
+match = re.search(r'@([^:]+):(\d+)/', db_url)
+if match:
+    db_host = match.group(1)
+    db_port = int(match.group(2))
+else:
+    db_host = os.environ.get('DB_HOST', 'localhost')
+    db_port = int(os.environ.get('DB_PORT', 5432))
 
-if os.environ.get('DATABASE_URL'):
-    match = re.search(r'@([^:]+):(\d+)/', os.environ.get('DATABASE_URL', ''))
-    if match:
-        db_host = match.group(1)
-        db_port = int(match.group(2))
-
+print(f'Connecting to {db_host}:{db_port}')
 for i in range(30):
     try:
         with socket.create_connection((db_host, db_port), timeout=2):
             print('Database is ready')
             sys.exit(0)
-    except:
+    except Exception as e:
         time.sleep(2)
-        print(f'Waiting for database... {i+1}/30')
+        print(f'Waiting for database... {i+1}/30 ({str(e)})')
 print('Database timeout - continuing anyway')
 "
 
