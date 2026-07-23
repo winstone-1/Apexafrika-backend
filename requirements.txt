@@ -28,11 +28,9 @@ django-otp==1.5.3
 spotipy==2.24.0
 python-magic==0.4.27
 
-# ElevenLabs Voice
-elevenlabs==1.20.0
+
 pygame==2.6.1
 # Music & Audio
-spotipy==2.24.0
 python-magic==0.4.27
 
 # ElevenLabs Voice (use latest available)
