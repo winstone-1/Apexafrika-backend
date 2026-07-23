@@ -4,66 +4,404 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ApexAfrika API Documentation</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0/swagger-ui.css">
     <style>
+        /* Dark Mode Styles */
         body {
-            margin: 0;
-            padding: 0;
+            background: #0d1117 !important;
+            color: #c9d1d9 !important;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
         }
-        .api-header {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            padding: 20px 30px;
-            border-bottom: 3px solid #FFB300;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
+        
+        /* Header */
+        .swagger-ui .topbar {
+            background: #161b22 !important;
+            border-bottom: 1px solid #30363d;
+            padding: 15px 0;
         }
-        .api-header .logo h1 {
-            color: #FFB300;
-            font-size: 24px;
-            margin: 0;
+        
+        .swagger-ui .topbar .topbar-wrapper .link {
+            color: #FFB300 !important;
             font-weight: 700;
-            letter-spacing: 1px;
+            font-size: 20px;
         }
-        .api-header .logo span {
-            color: #ffffff;
-            font-size: 14px;
-            opacity: 0.7;
+        
+        .swagger-ui .topbar .topbar-wrapper .link img {
+            display: none;
         }
-        .api-header .badges {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
+        
+        .swagger-ui .topbar .topbar-wrapper .link:before {
+            content: "ApexAfrika";
         }
-        .api-header .badges .badge {
-            padding: 6px 14px;
-            border-radius: 20px;
+        
+        .swagger-ui .topbar .download-url-wrapper .select-label {
+            color: #8b949e !important;
+        }
+        
+        .swagger-ui .topbar .download-url-wrapper input {
+            background: #0d1117 !important;
+            border-color: #30363d !important;
+            color: #c9d1d9 !important;
+        }
+        
+        /* Info Section */
+        .swagger-ui .info .title {
+            color: #FFB300 !important;
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .swagger-ui .info .description {
+            color: #8b949e !important;
+        }
+        
+        .swagger-ui .info .description p {
+            color: #8b949e !important;
+        }
+        
+        .swagger-ui .info .info__contact {
+            color: #8b949e !important;
+        }
+        
+        .swagger-ui .info .info__license {
+            color: #8b949e !important;
+        }
+        
+        /* Scheme Container */
+        .swagger-ui .scheme-container {
+            background: #161b22 !important;
+            border-color: #30363d !important;
+            border-radius: 6px;
+            margin: 20px 0;
+            padding: 15px 20px;
+            box-shadow: none !important;
+        }
+        
+        .swagger-ui .scheme-container .schemes {
+            background: #0d1117 !important;
+        }
+        
+        .swagger-ui .scheme-container .schemes select {
+            background: #0d1117 !important;
+            color: #c9d1d9 !important;
+            border-color: #30363d !important;
+        }
+        
+        /* Buttons */
+        .swagger-ui .btn {
+            background: #FFB300 !important;
+            color: #0d1117 !important;
+            border: none !important;
+            font-weight: 600 !important;
+            border-radius: 6px !important;
+            padding: 8px 16px !important;
+        }
+        
+        .swagger-ui .btn:hover {
+            background: #ffca28 !important;
+            color: #0d1117 !important;
+        }
+        
+        .swagger-ui .btn.cancel {
+            background: #21262d !important;
+            color: #c9d1d9 !important;
+        }
+        
+        .swagger-ui .btn.cancel:hover {
+            background: #30363d !important;
+        }
+        
+        /* Operation Blocks */
+        .swagger-ui .opblock {
+            background: #161b22 !important;
+            border-color: #30363d !important;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            box-shadow: none !important;
+        }
+        
+        .swagger-ui .opblock .opblock-summary {
+            padding: 12px 18px;
+        }
+        
+        .swagger-ui .opblock .opblock-summary-method {
+            background: #FFB300 !important;
+            color: #0d1117 !important;
+            font-weight: 700;
+            border-radius: 4px;
+            padding: 3px 10px;
             font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            min-width: 60px;
+            text-align: center;
         }
-        .badge-version { background: #FFB300; color: #1a1a2e; }
-        .badge-status { background: #00e676; color: #1a1a2e; }
-        .badge-auth { background: #1a1a2e; color: #FFB300; border: 1px solid #FFB300; }
+        
+        .swagger-ui .opblock .opblock-summary .opblock-summary-description {
+            color: #8b949e !important;
+        }
+        
+        .swagger-ui .opblock .opblock-summary .opblock-summary-path {
+            color: #c9d1d9 !important;
+            font-size: 14px;
+        }
+        
+        .swagger-ui .opblock .opblock-summary .opblock-summary-path .opblock-summary-path__deprecated {
+            color: #f85149 !important;
+        }
+        
+        .swagger-ui .opblock .opblock-summary .opblock-summary-path__deprecated {
+            color: #f85149 !important;
+        }
+        
+        .swagger-ui .opblock .opblock-summary .opblock-summary-path .highlight-code {
+            background: #0d1117 !important;
+        }
+        
+        /* Operation Section */
+        .swagger-ui .opblock .opblock-section {
+            background: #0d1117 !important;
+        }
+        
+        .swagger-ui .opblock .opblock-section .opblock-section-header {
+            background: #161b22 !important;
+            border-color: #30363d !important;
+            padding: 8px 16px;
+        }
+        
+        .swagger-ui .opblock .opblock-section .opblock-section-header .tab-header {
+            color: #c9d1d9 !important;
+        }
+        
+        .swagger-ui .opblock .opblock-section .opblock-section-header .opblock-section-header__options .btn {
+            background: #21262d !important;
+            color: #8b949e !important;
+        }
+        
+        .swagger-ui .opblock .opblock-section .opblock-section-header .opblock-section-header__options .btn.active {
+            background: #FFB300 !important;
+            color: #0d1117 !important;
+        }
+        
+        /* Parameters */
+        .swagger-ui .parameter__name {
+            color: #c9d1d9 !important;
+        }
+        
+        .swagger-ui .parameter__in {
+            color: #FFB300 !important;
+        }
+        
+        .swagger-ui .parameters-col_description .parameter__type {
+            color: #8b949e !important;
+        }
+        
+        .swagger-ui .parameters-col_description .parameter__type .markdown {
+            color: #8b949e !important;
+        }
+        
+        /* Model Box */
+        .swagger-ui .model-box {
+            background: #0d1117 !important;
+            border-color: #30363d !important;
+            color: #c9d1d9 !important;
+            border-radius: 6px;
+        }
+        
+        .swagger-ui .model-box .model .property .string {
+            color: #ff7b72 !important;
+        }
+        
+        .swagger-ui .model-box .model .property .number {
+            color: #79c0ff !important;
+        }
+        
+        .swagger-ui .model-box .model .property .boolean {
+            color: #d2a8ff !important;
+        }
+        
+        .swagger-ui .model-box .model .property .null {
+            color: #8b949e !important;
+        }
+        
+        .swagger-ui .model-box .model .property .array {
+            color: #ffa657 !important;
+        }
+        
+        .swagger-ui .model-title {
+            color: #c9d1d9 !important;
+        }
+        
+        .swagger-ui .model .property .primitive {
+            color: #c9d1d9 !important;
+        }
+        
+        /* Tabs */
+        .swagger-ui .tab-header .tab-item {
+            color: #8b949e !important;
+        }
+        
+        .swagger-ui .tab-header .tab-item.active {
+            color: #FFB300 !important;
+        }
+        
+        .swagger-ui .tab-header .tab-item.active h4 {
+            color: #FFB300 !important;
+        }
+        
+        .swagger-ui .tab-header .tab-item .tab-item__tab {
+            color: #8b949e !important;
+        }
+        
+        .swagger-ui .tab-header .tab-item .tab-item__tab.active {
+            color: #FFB300 !important;
+        }
+        
+        /* Models */
+        .swagger-ui .models {
+            background: #0d1117 !important;
+            border-color: #30363d !important;
+        }
+        
+        .swagger-ui .models .model-container {
+            background: #161b22 !important;
+            border-color: #30363d !important;
+            border-radius: 6px;
+        }
+        
+        .swagger-ui .models .model-container .models-control .model-title {
+            color: #c9d1d9 !important;
+        }
+        
+        /* Responses */
+        .swagger-ui .response-control {
+            background: #161b22 !important;
+            border-color: #30363d !important;
+        }
+        
+        .swagger-ui .response-control .response-control__accept-header .response-control__accept-header__title {
+            color: #c9d1d9 !important;
+        }
+        
+        .swagger-ui .response-col_links .response-col_links__title {
+            color: #8b949e !important;
+        }
+        
+        /* Code Highlighting */
+        .swagger-ui .highlight-code {
+            background: #0d1117 !important;
+            border-radius: 6px;
+        }
+        
+        .swagger-ui .highlight-code pre {
+            color: #e6edf3 !important;
+        }
+        
+        .swagger-ui .highlight-code .hljs-string {
+            color: #ff7b72 !important;
+        }
+        
+        .swagger-ui .highlight-code .hljs-number {
+            color: #79c0ff !important;
+        }
+        
+        .swagger-ui .highlight-code .hljs-keyword {
+            color: #ff7b72 !important;
+        }
+        
+        .swagger-ui .highlight-code .hljs-comment {
+            color: #8b949e !important;
+        }
+        
+        .swagger-ui .highlight-code .hljs-attr {
+            color: #d2a8ff !important;
+        }
+        
+        /* Tables */
+        .swagger-ui table {
+            color: #c9d1d9 !important;
+        }
+        
+        .swagger-ui table th {
+            color: #8b949e !important;
+        }
+        
+        .swagger-ui table td {
+            color: #c9d1d9 !important;
+        }
+        
+        /* Badge Colors for HTTP Methods */
+        .swagger-ui .opblock-get .opblock-summary-method {
+            background: #2f81f7 !important;
+            color: #ffffff !important;
+        }
+        
+        .swagger-ui .opblock-post .opblock-summary-method {
+            background: #2da44e !important;
+            color: #ffffff !important;
+        }
+        
+        .swagger-ui .opblock-put .opblock-summary-method {
+            background: #d29922 !important;
+            color: #ffffff !important;
+        }
+        
+        .swagger-ui .opblock-delete .opblock-summary-method {
+            background: #da3633 !important;
+            color: #ffffff !important;
+        }
+        
+        .swagger-ui .opblock-patch .opblock-summary-method {
+            background: #d29922 !important;
+            color: #ffffff !important;
+        }
+        
+        .swagger-ui .opblock-options .opblock-summary-method {
+            background: #8250df !important;
+            color: #ffffff !important;
+        }
+        
+        .swagger-ui .opblock-head .opblock-summary-method {
+            background: #2f81f7 !important;
+            color: #ffffff !important;
+        }
+        
+        /* Responsive */
         @media (max-width: 768px) {
-            .api-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .swagger-ui .topbar .topbar-wrapper .link {
+                font-size: 16px;
+            }
+            
+            .swagger-ui .opblock .opblock-summary {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            
+            .swagger-ui .opblock .opblock-summary .opblock-summary-path {
+                font-size: 12px;
+                word-break: break-all;
+            }
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #0d1117;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #FFB300;
         }
     </style>
 </head>
 <body>
-    <div class="api-header">
-        <div class="logo">
-            <h1>🦁 ApexAfrika</h1>
-            <span>API v1.0.0</span>
-        </div>
-        <div class="badges">
-            <span class="badge badge-version">v1.0.0</span>
-            <span class="badge badge-status">Live</span>
-            <span class="badge badge-auth">JWT + OAuth</span>
-        </div>
-    </div>
     <div id="swagger-ui"></div>
     <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0/swagger-ui-bundle.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0/swagger-ui-standalone-preset.js"></script>
@@ -74,7 +412,7 @@
                 dom_id: '#swagger-ui',
                 presets: [
                     SwaggerUIBundle.presets.apis,
-                    SwaggerUIStandalonePreset
+                    SwaggerUIBundle.SwaggerUIStandalonePreset
                 ],
                 plugins: [
                     SwaggerUIBundle.plugins.DownloadUrl

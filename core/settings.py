@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'apps.feedback',
     'apps.audit',
     'apps.legal',
+    'apps.music',
 ]
 
 MIDDLEWARE = [
@@ -298,3 +299,113 @@ GROQ_MODEL = os.getenv('GROQ_MODEL', 'llama3-70b-8192')
 #         'BACKEND': 'channels.layers.InMemoryChannelLayer',
 #     },
 # }
+
+# ============================================
+# DRF Spectacular - Enhanced Tag Grouping
+# ============================================
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'ApexAfrika API Documentation',
+    'DESCRIPTION': 'ApexAfrika - Game Operations Platform for African Esports',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SERVE_PUBLIC': True,
+    'SWAGGER_UI_SETTINGS': {
+        'deepLinking': True,
+        'persistAuthorization': True,
+        'displayOperationId': True,
+        'displayRequestDuration': True,
+        'filter': True,
+        'requestSnippetsEnabled': True,
+        'tryItOutEnabled': True,
+        'defaultModelsExpandDepth': 3,
+        'defaultModelExpandDepth': 3,
+        'docExpansion': 'none',
+        'syntaxHighlight': {
+            'activated': True,
+            'theme': 'agate',
+        },
+    },
+    'TAGS': [
+        {'name': 'auth', 'description': 'Authentication endpoints (Register, Login, OAuth, 2FA)'},
+        {'name': 'profile', 'description': 'User profile management'},
+        {'name': 'tournaments', 'description': 'Tournament management'},
+        {'name': 'players', 'description': 'Player analytics and leaderboards'},
+        {'name': 'community', 'description': 'Community posts, comments, and likes'},
+        {'name': 'payments', 'description': 'Payment integration'},
+        {'name': 'notifications', 'description': 'User notifications'},
+        {'name': 'chat', 'description': 'Real-time chat'},
+        {'name': 'ai', 'description': 'AI-powered predictions and chat'},
+        {'name': 'teams', 'description': 'Team management'},
+        {'name': 'sponsors', 'description': 'Sponsorship management'},
+        {'name': 'achievements', 'description': 'Achievements and badges'},
+        {'name': 'schedules', 'description': 'Match scheduling and calendar'},
+        {'name': 'streaming', 'description': 'Live streaming'},
+        {'name': 'content', 'description': 'Content and education'},
+        {'name': 'newsletter', 'description': 'Newsletter subscriptions'},
+        {'name': 'feedback', 'description': 'User feedback and surveys'},
+        {'name': 'analytics', 'description': 'Platform analytics'},
+        {'name': 'audit', 'description': 'Audit logs'},
+        {'name': 'legal', 'description': 'Legal documents and consent'},
+        {'name': 'admin', 'description': 'Admin operations'},
+        {'name': 'health', 'description': 'Health checks'},
+    ],
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SORT_OPERATIONS': True,
+    'ENABLE_DJANGO_DEPRECATED_WARNINGS': False,
+}
+
+# ============================================
+# DRF Spectacular - Fixed Configuration
+# ============================================
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'ApexAfrika API Documentation',
+    'DESCRIPTION': 'ApexAfrika - Game Operations Platform for African Esports',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SERVE_PUBLIC': True,
+    'SWAGGER_UI_SETTINGS': {
+        'deepLinking': True,
+        'persistAuthorization': True,
+        'displayOperationId': True,
+        'displayRequestDuration': True,
+        'filter': True,
+        'requestSnippetsEnabled': True,
+        'tryItOutEnabled': True,
+        'defaultModelsExpandDepth': 3,
+        'defaultModelExpandDepth': 3,
+        'docExpansion': 'none',
+        'syntaxHighlight': {
+            'activated': True,
+            'theme': 'agate',
+        },
+    },
+    'TAGS': [
+        {'name': 'auth', 'description': 'Authentication endpoints (Register, Login, OAuth, 2FA)'},
+        {'name': 'profile', 'description': 'User profile management'},
+        {'name': 'tournaments', 'description': 'Tournament management'},
+        {'name': 'players', 'description': 'Player analytics and leaderboards'},
+        {'name': 'community', 'description': 'Community posts, comments, and likes'},
+        {'name': 'payments', 'description': 'Payment integration'},
+        {'name': 'notifications', 'description': 'User notifications'},
+        {'name': 'chat', 'description': 'Real-time chat'},
+        {'name': 'ai', 'description': 'AI-powered predictions and chat'},
+        {'name': 'teams', 'description': 'Team management'},
+        {'name': 'sponsors', 'description': 'Sponsorship management'},
+        {'name': 'achievements', 'description': 'Achievements and badges'},
+        {'name': 'schedules', 'description': 'Match scheduling and calendar'},
+        {'name': 'streaming', 'description': 'Live streaming'},
+        {'name': 'content', 'description': 'Content and education'},
+        {'name': 'newsletter', 'description': 'Newsletter subscriptions'},
+        {'name': 'feedback', 'description': 'User feedback and surveys'},
+        {'name': 'analytics', 'description': 'Platform analytics'},
+        {'name': 'audit', 'description': 'Audit logs'},
+        {'name': 'legal', 'description': 'Legal documents and consent'},
+        {'name': 'admin', 'description': 'Admin operations'},
+        {'name': 'health', 'description': 'Health checks'},
+    ],
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SORT_OPERATIONS': True,
+    'ENABLE_DJANGO_DEPRECATED_WARNINGS': False,
+}

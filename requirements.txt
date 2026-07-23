@@ -24,3 +24,16 @@ dj-database-url==2.2.0
 drf-spectacular==0.27.2
 qrcode==7.4.2
 django-otp==1.5.3
+# Music & Audio
+spotipy==2.24.0
+python-magic==0.4.27
+
+# ElevenLabs Voice
+elevenlabs==1.20.0
+pygame==2.6.1
+# Music & Audio
+spotipy==2.24.0
+python-magic==0.4.27
+
+# ElevenLabs Voice (use latest available)
+elevenlabs>=2.0.0

@@ -2,9 +2,11 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic import RedirectView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 
 urlpatterns = [
+    path('', RedirectView.as_view(url='/api/docs/', permanent=False), name='root'),
     path('admin/', admin.site.urls),
     path('api/v1/auth/', include('apps.users.urls')),
     path('api/v1/tournaments/', include('apps.tournaments.urls')),
@@ -25,6 +27,7 @@ urlpatterns = [
     path('api/v1/feedback/', include('apps.feedback.urls')),
     path('api/v1/audit/', include('apps.audit.urls')),
     path('api/v1/legal/', include('apps.legal.urls')),
+    path('api/v1/music/', include('apps.music.urls')),  # ADD THIS LINE
     path('health/', include('apps.health.urls')),
     
     # API Documentation
